@@ -1,33 +1,38 @@
-# SysAdmin Toolbox 🛠️ v1.1
+# SysAdmin Toolbox 🛠️ v1.2
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Educational-orange?style=for-the-badge)
+![Security](https://img.shields.io/badge/Security-Blue_Team-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-A lightweight CLI tool for basic system monitoring, backup operations, battery health checks, and **file integrity monitoring** on Linux systems.
+A lightweight CLI tool for system monitoring, automated backups, and **comprehensive security auditing** on Linux systems.
 
-> **🎓 Educational Project:** This tool was developed as a capstone project for my **Bash Scripting Learning Journey**. It is designed to demonstrate core concepts like functions, loops, case statements, hashing, and system interaction.
+> **🎓 Educational Project:** This tool was developed as a capstone project for my **Bash Scripting Learning Journey**. It demonstrates core concepts like log parsing (`journalctl`), file integrity hashing (`sha256sum`), and modular script architecture.
 
 ## 🚀 Features
 
-* **File Integrity Monitor (FIM):** **[NEW]** Detects unauthorized file changes using SHA256 hashing.
-    * *Init Mode:* Learns the baseline state of files.
-    * *Check Mode:* Scans for modifications or deletions.
+### 🛡️ Security Modules
+* **Advanced Log Analyzer (Intrusion Detection):** **[NEW]** Audits system logs for potential threats.
+    * **SSH Brute-Force Detection:** Tracks failed login attempts, invalid username trials, and identifies top attacking IPs.
+    * **Sudo Violation Monitor:** Detects unauthorized root access attempts and privilege escalation incidents.
+    * **Detailed Reporting:** Provides timestamps, usernames, and IP addresses for every alert.
+* **File Integrity Monitor (FIM):** Detects unauthorized file changes using SHA256 hashing.
+    * *Init Mode:* Creates a secure baseline of critical files.
+    * *Check Mode:* Scans for silent modifications or deletions.
+
+### ⚙️ System Utilities
 * **System Information:** Displays kernel version, uptime, load average, and memory usage.
-* **Disk Usage Analyzer:** Calculates partition usage and scans for large files (>100MB).
+* **Disk Usage Analyzer:** Calculates partition usage and intelligently scans for large files (>100MB).
 * **Battery Health Monitor:** Checks battery capacity and status (using `upower`).
-* **Automated Backups:** Archives specific directories into `.tar.gz` format.
-* **Interactive Menu:** Simple navigation with color-coded output.
+* **Automated Backups:** Archives specific directories into `.tar.gz` format with timestamping.
 
 ## 📋 Requirements
 
-This script is developed and tested on **Fedora Linux**, but should work on most distros.
+Designed for **Fedora Linux** (uses `journalctl`), but compatible with most systemd-based distributions.
 
 * `bash` (4.0+)
-* `bc` (Basic Calculator for math ops)
-* `upower` (For battery monitoring)
-* `tar` (For backups)
-* `sha256sum` (Coreutils - For FIM module)
+* `journalctl` (For Log Analysis)
+* `sha256sum` (For FIM)
+* `bc` & `upower` (For utilities)
 
 ## 📦 Installation & Usage
 
@@ -50,11 +55,9 @@ This script is developed and tested on **Fedora Linux**, but should work on most
 ## 🧠 Learning Outcomes
 
 By building this tool, I practiced:
-* Modular programming with **Functions**.
-* **Security Basics:** File Integrity Monitoring and Hashing algorithms.
-* User interaction using **read** and **case statements**.
-* String manipulation and arithmetic operations.
-* File system management and conditional logic (`if`, `test`).
+* **Cyber Security:** Log analysis for intrusion detection and File Integrity Monitoring (FIM).
+* **System Administration:** Parsing system logs (`journalctl`), user management, and process monitoring.
+* **Bash Scripting:** Advanced text processing (`awk`, `grep`, `sed`), functions, and interactive menus.
 
 ## 📄 License
 
