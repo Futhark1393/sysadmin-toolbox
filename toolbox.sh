@@ -1,154 +1,180 @@
 #!/bin/bash
 
-# --- Configuration & Colors ---
-# ANSI Color Codes for pretty output
-GREEN='\033[0;32m'
+# ==========================================
+# SysAdmin Toolbox v1.1
+# Developer: Futhark1393
+# Description: System Monitoring, Backups, and File Integrity (FIM)
+# License: MIT
+# ==========================================
+
+# --- Colors ---
 RED='\033[0;31m'
+GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Backup directory (current folder for demo purposes)
-BACKUP_DIR="./backups"
+# --- Configuration ---
+BASELINE_FILE="fim_baseline.db"
 
-# --- Helper Functions ---
+# --- Functions ---
 
-# Function to pause and wait for user input
 pause() {
-    read -p "Press [Enter] to return to the menu..."
+    read -p "Press [Enter] to return to menu..."
 }
 
-# Function 1: Display System Information
-# Uses: Variables, String Manipulation, Command Substitution
-show_sys_info() {
-    echo -e "${BLUE}--- System Information ---${NC}"
-    echo "Hostname : $(hostname)"
-    echo "Kernel   : $(uname -r)"
-    echo "Uptime   : $(uptime -p)"
-    echo "User     : $USER"
-    echo -e "${BLUE}--------------------------${NC}"
+header() {
+    clear
+    echo -e "${CYAN}======================================${NC}"
+    echo -e "${CYAN}    SYSADMIN TOOLBOX - v1.1           ${NC}"
+    echo -e "${CYAN}    User: $USER | Host: $HOSTNAME     ${NC}"
+    echo -e "${CYAN}======================================${NC}"
+}
+
+sys_monitor() {
+    header
+    echo -e "${YELLOW}[*] System Monitoring${NC}"
+    echo "---------------------------------"
+    echo -e "Kernel Version : $(uname -r)"
+    echo -e "Uptime         : $(uptime -p)"
+    echo -e "Load Average   : $(uptime | awk -F'load average:' '{ print $2 }')"
+    echo -e "Memory Usage   : $(free -h | grep Mem | awk '{print $3 "/" $2}')"
+    echo ""
     pause
 }
 
-# Function 2: Disk Usage Analyzer
-# Uses: Arithmetic, bc (Floating point), If/Else
-check_disk_usage() {
-    echo -e "${YELLOW}Checking Disk Usage...${NC}"
+disk_usage() {
+    header
+    echo -e "${YELLOW}[*] Disk Usage Analysis (Root)${NC}"
+    echo "---------------------------------"
+    df -h / | awk 'NR==2 {print "Total: " $2, "| Used: " $3, "| Free: " $4, "| Use%: " $5}'
     
-    # Get usage percentage of root partition / (removes % sign)
-    usage=$(df / | grep / | awk '{ print $5 }' | sed 's/%//g')
+    # Advanced: Find files larger than 100MB
+    echo ""
+    echo -e "${BLUE}Scanning for large files (>100MB) in /var/log...${NC}"
+    find /var/log -type f -size +100M -exec ls -lh {} \; 2>/dev/null
     
-    # Example of floating point calculation using bc
-    # Let's pretend we want to calculate free space ratio precisely
-    free_ratio=$(echo "scale=2; (100 - $usage) / 100" | bc)
-    
-    echo "Root Partition Usage: ${usage}%"
-    echo "Free Space Ratio: $free_ratio"
-
-    if [ $usage -ge 80 ]; then
-        echo -e "${RED}WARNING: Disk space is critically low!${NC}"
-    elif [ $usage -ge 50 ]; then
-        echo -e "${YELLOW}WARNING: Disk space is getting full.${NC}"
-    else
-        echo -e "${GREEN}STATUS: Disk space is healthy.${NC}"
-    fi
+    echo ""
     pause
 }
 
-# Function 3: Backup Tool
-# Uses: Arrays, For Loops, File Tests (-d), Date command
-backup_files() {
-    echo -e "${BLUE}--- Starting Backup Process ---${NC}"
+backup_ops() {
+    header
+    echo -e "${YELLOW}[*] Automated Backup${NC}"
+    echo "---------------------------------"
+    read -p "Enter directory to backup (Full Path): " TARGET_DIR
     
-    # Create backup directory if it doesn't exist
-    if [ ! -d "$BACKUP_DIR" ]; then
-        mkdir -p "$BACKUP_DIR"
-        echo "Created backup directory: $BACKUP_DIR"
-    fi
-
-    # Array of folders to backup (We will backup our codes folder)
-    folders_to_backup=("codes" "non_existent_folder_test")
-
-    for folder in "${folders_to_backup[@]}"; do
-        if [ -d "$folder" ]; then
-            archive_name="backup_$(basename $folder)_$(date +%Y%m%d).tar.gz"
-            echo "Backing up '$folder' to '$BACKUP_DIR/$archive_name'..."
-            
-            # Create archive (suppress output with > /dev/null)
-            tar -czf "$BACKUP_DIR/$archive_name" "$folder" 2>/dev/null
-            
-            if [ $? -eq 0 ]; then
-                echo -e "${GREEN}Success: $folder backed up.${NC}"
-            else
-                echo -e "${RED}Error: Failed to backup $folder.${NC}"
-            fi
+    if [ -d "$TARGET_DIR" ]; then
+        BACKUP_NAME="backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+        echo -e "${BLUE}Compressing $TARGET_DIR ...${NC}"
+        tar -czf "$BACKUP_NAME" "$TARGET_DIR" 2>/dev/null
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}[SUCCESS] Backup saved as: $BACKUP_NAME${NC}"
         else
-            echo -e "${RED}Skipping: Folder '$folder' does not exist.${NC}"
+            echo -e "${RED}[ERROR] Backup failed! Check permissions.${NC}"
         fi
-    done
-    pause
-}
-
-# Function 4: Battery Health Monitor
-# Uses: upower, grep, awk
-check_battery_status() {
-    echo -e "${YELLOW}Checking Battery Status...${NC}"
-    
-    # Find the battery path (usually /org/freedesktop/UPower/devices/battery_BAT0)
-    # We take the first BAT result we find.
-    BAT_PATH=$(upower -e | grep 'BAT' | head -n 1)
-
-    if [ -z "$BAT_PATH" ]; then
-        echo -e "${RED}Error: No battery detected.${NC}"
     else
-        # Extract specific info using upower -i
-        # We grab state, percentage, and capacity (which is health)
-        echo -e "${BLUE}--- Battery Details ---${NC}"
-        
-        upower -i "$BAT_PATH" | grep -E "state|percentage|capacity|time to empty|time to full"
-        
-        echo -e "${BLUE}-----------------------${NC}"
-        echo "Note: 'capacity' shows your battery health (100% is new)."
+        echo -e "${RED}[ERROR] Directory not found!${NC}"
     fi
     pause
 }
 
-# --- Main Logic (Menu System) ---
-# Uses: While Loop, Case Statement, User Input
+battery_check() {
+    header
+    echo -e "${YELLOW}[*] Battery Health Status${NC}"
+    echo "---------------------------------"
+    if command -v upower &> /dev/null; then
+        BATTERY_PATH=$(upower -e | grep 'BAT')
+        if [ -n "$BATTERY_PATH" ]; then
+            upower -i "$BATTERY_PATH" | grep -E "state|to\ full|percentage|capacity"
+        else
+            echo -e "${RED}No battery detected.${NC}"
+        fi
+    else
+        echo -e "${RED}'upower' tool not installed.${NC}"
+    fi
+    pause
+}
 
+# --- NEW: File Integrity Monitor Module ---
+fim_ops() {
+    while true; do
+        header
+        echo -e "${YELLOW}[*] File Integrity Monitor (FIM)${NC}"
+        echo "---------------------------------"
+        echo "1. Initialize Baseline (Learn Hashes)"
+        echo "2. Check Integrity (Scan for Changes)"
+        echo "3. Back to Main Menu"
+        echo ""
+        read -p "Select FIM Option: " fim_choice
+
+        case $fim_choice in
+            1)
+                echo ""
+                read -p "Enter files to monitor (e.g. *.txt or /etc/passwd): " TARGET_FILES
+                echo -e "${BLUE}Calculating hashes for: $TARGET_FILES ...${NC}"
+                
+                # Overwrite old baseline
+                if [ -f "$BASELINE_FILE" ]; then rm "$BASELINE_FILE"; fi
+                
+                # Loop through files and hash them
+                for f in $TARGET_FILES; do
+                    if [ -f "$f" ]; then
+                        sha256sum "$f" >> "$BASELINE_FILE"
+                        echo "  [+] Added: $f"
+                    fi
+                done
+                echo -e "${GREEN}[DONE] Baseline saved to $BASELINE_FILE${NC}"
+                read -p "Press Enter..."
+                ;;
+            2)
+                echo ""
+                if [ ! -f "$BASELINE_FILE" ]; then
+                    echo -e "${RED}[ERROR] No baseline found! Run Init first.${NC}"
+                else
+                    echo -e "${BLUE}Checking integrity...${NC}"
+                    while read -r saved_hash filename; do
+                        if [ -f "$filename" ]; then
+                            current_hash=$(sha256sum "$filename" | awk '{print $1}')
+                            if [ "$current_hash" == "$saved_hash" ]; then
+                                echo -e "${GREEN}[OK] $filename${NC}"
+                            else
+                                echo -e "${RED}[ALERT] MODIFIED: $filename${NC}"
+                            fi
+                        else
+                            echo -e "${RED}[MISSING] DELETED: $filename${NC}"
+                        fi
+                    done < "$BASELINE_FILE"
+                fi
+                read -p "Press Enter..."
+                ;;
+            3) return ;;
+            *) echo "Invalid option." ;;
+        esac
+    done
+}
+
+# --- Main Menu Loop ---
 while true; do
-    clear # Clears the terminal screen
-    echo -e "${GREEN}================================${NC}"
-    echo -e "${GREEN}   SYSADMIN TOOLBOX v1.0        ${NC}"
-    echo -e "${GREEN}================================${NC}"
-    echo "1. Show System Information"
-    echo "2. Check Disk Usage"
-    echo "3. Backup Project Files"
-    echo "4. Check Battery Status"   
-    echo "5. Exit"                   
-    echo -e "${GREEN}================================${NC}"
-    
-    read -p "Enter your choice [1-5]: " choice
+    header
+    echo "1. System Monitor"
+    echo "2. Disk Usage"
+    echo "3. Backup Tool"
+    echo "4. Battery Health"
+    echo "5. File Integrity Monitor (FIM) [NEW]"
+    echo "6. Exit"
+    echo ""
+    read -p "Select an option [1-6]: " choice
+
     case $choice in
-        1)
-            show_sys_info
-            ;;
-        2)
-            check_disk_usage
-            ;;
-        3)
-            backup_files
-            ;;
-        4)                       
-            check_battery_status
-            ;;
-        5)                      
-            echo "Exiting... Goodbye, $USER!"
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Invalid option! Please try again.${NC}"
-            sleep 1
-            ;;
+        1) sys_monitor ;;
+        2) disk_usage ;;
+        3) backup_ops ;;
+        4) battery_check ;;
+        5) fim_ops ;;
+        6) echo -e "${GREEN}Exiting. Have a secure day, Futhark!${NC}"; exit 0 ;;
+        *) echo -e "${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
 done
