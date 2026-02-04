@@ -98,6 +98,53 @@ battery_check() {
     pause
 }
 
+# --- NEW: Advanced Log Analyzer Module ---
+log_analyze() {
+    header
+    echo -e "${YELLOW}[*] Security Intrusion & Log Analysis${NC}"
+    echo "---------------------------------------"
+    
+    if command -v journalctl &> /dev/null; then
+        
+        # --- 1. SSH: Invalid User Attempts (Brute Force on Usernames) ---
+        echo -e "${CYAN}--- SSH: Invalid Usernames (Top 5) ---${NC}"
+        # "Invalid user" geçen satırları bul, IP'leri ayıkla
+        if journalctl -u sshd | grep -q "Invalid user"; then
+            journalctl -u sshd | grep "Invalid user" | awk '{print $(NF-2)}' | sort | uniq -c | sort -nr | head -n 5
+        else
+            echo -e "${GREEN}No invalid user attempts detected.${NC}"
+        fi
+        echo ""
+
+        # --- 2. SSH: Failed Passwords (Brute Force on Valid Users) ---
+        echo -e "${RED}--- SSH: Failed Password Attempts (Last 5) ---${NC}"
+        # Tarih, Saat, Kullanıcı ve IP bilgisini düzenli göster
+        if journalctl -u sshd | grep -q "Failed password"; then
+            # Format: Month Day Time ... User ... IP
+            journalctl -u sshd | grep "Failed password" | tail -n 5 | awk '{print $1, $2, $3, "-> User:", $(NF-5), "from IP:", $(NF-3)}'
+        else
+            echo -e "${GREEN}No failed password attempts detected.${NC}"
+        fi
+        echo ""
+
+        # --- 3. SUDO: Unauthorized Root Access Attempts ---
+        echo -e "${YELLOW}--- SUDO: Internal Security Incidents ---${NC}"
+        # "COMMAND" çalıştırırken hata alanları bul
+        if journalctl _COMM=sudo | grep -q "COMMAND"; then
+             journalctl _COMM=sudo | grep "NOT in sudoers" | tail -n 5
+             journalctl _COMM=sudo | grep "incorrect password" | tail -n 5
+        else
+             echo -e "${GREEN}No sudo violations found.${NC}"
+        fi
+
+    else
+        echo -e "${RED}Error: journalctl not found. Cannot analyze logs.${NC}"
+    fi
+    
+    echo ""
+    pause
+}
+
 # --- NEW: File Integrity Monitor Module ---
 fim_ops() {
     while true; do
@@ -163,10 +210,11 @@ while true; do
     echo "2. Disk Usage"
     echo "3. Backup Tool"
     echo "4. Battery Health"
-    echo "5. File Integrity Monitor (FIM) [NEW]"
-    echo "6. Exit"
+    echo "5. File Integrity Monitor (FIM)"
+    echo "6. Log Analyzer (Intruder Detect) [NEW]"
+    echo "7. Exit"
     echo ""
-    read -p "Select an option [1-6]: " choice
+    read -p "Select an option [1-7]: " choice
 
     case $choice in
         1) sys_monitor ;;
@@ -174,7 +222,9 @@ while true; do
         3) backup_ops ;;
         4) battery_check ;;
         5) fim_ops ;;
-        6) echo -e "${GREEN}Exiting. Have a secure day, Futhark!${NC}"; exit 0 ;;
+        6) log_analyze ;;  # <--- YENİ EKLENEN
+        7) echo -e "${GREEN}Exiting. Have a secure day, Futhark!${NC}"; exit 0 ;;
         *) echo -e "${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
 done
+
