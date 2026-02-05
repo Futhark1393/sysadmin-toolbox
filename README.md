@@ -1,4 +1,4 @@
-# SysAdmin Toolbox 🛠️ v2.6 (PDF Report Edition)
+# SysAdmin Toolbox 🛠️ v2.6.1 (Stable)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -22,24 +22,19 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
 
 ---
 
-## 🚀 What's New in v2.6?
+## 🚀 What's New in v2.6.1?
+
+### 🔧 Bug Fixes (Hotfix)
+* **FIM Logic Fixed:** Resolved the "Error Code 1" issue in the File Integrity Monitor. It now uses the `find` command to gracefully handle missing file extensions during baseline creation.
 
 ### 📄 Professional PDF Reporting
 * **Export Scan Results:** Right-click on the scan results to save them as a professional PDF report.
 * **Auto-Sanitization:** Automatically converts emojis (e.g., ✅, 🚀) into text-safe format (e.g., `[+]`, `>>>`) to ensure compatibility with all PDF readers.
-* **Context Menu:** Native right-click integration for easy export.
 
 ### 🕵️‍♂️ Network & Security
 * **Advanced Port Scanner:** Multithreaded scanning preventing UI freeze.
 * **Banner Grabbing:** Detects service versions (e.g., `SSH-2.0-OpenSSH_8.7`) running on open ports.
 * **Log Analyzer (IDS):** Detects SSH brute-force attacks and Sudo violations.
-* **File Integrity Monitor (FIM):** Automatically creates baselines and detects unauthorized file changes.
-
-### ⚙️ System Utilities
-* **Tabbed Interface:** Clean separation between System Dashboard and Network Tools.
-* **Service Manager:** Start, Stop, and Restart systemd services (e.g., `sshd`, `cron`) with root privileges (`pkexec`).
-* **System Monitor:** Real-time kernel, uptime, and RAM usage stats.
-* **Automated Backups:** Easy-to-use directory backup tool.
 
 ## 📂 Project Structure
 
@@ -77,7 +72,7 @@ Designed for **Fedora Linux**, but compatible with most systemd-based distributi
 
 Clone the repository:
 ```bash
-git clone https://github.com/Futhark1393/sysadmin-toolbox.git
+git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
 cd sysadmin-toolbox
 ```
 

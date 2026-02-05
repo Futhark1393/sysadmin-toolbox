@@ -9,7 +9,6 @@ from PyQt6.QtCore import QThread, pyqtSignal, Qt, QPoint
 from fpdf import FPDF
 
 # --- WORKER THREAD (For Port Scanner & Banner Grabbing) ---
-# Performs background scanning and information gathering without freezing the UI
 class PortScannerWorker(QThread):
     update_signal = pyqtSignal(str)
     finished_signal = pyqtSignal()
@@ -20,40 +19,30 @@ class PortScannerWorker(QThread):
 
     def run(self):
         self.update_signal.emit(f"🚀 Starting Deep Scan on {self.target_ip}...\n")
-        
-        # List of most popular and critical ports
         common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 993, 995, 1433, 3306, 3389, 5900, 8080]
         
         open_ports = 0
         for port in common_ports:
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(1.0) # Increased timeout to wait for banner
+                sock.settimeout(1.0)
                 result = sock.connect_ex((self.target_ip, port))
                 
                 if result == 0:
-                    # 1. Guess Service Name
                     try:
                         service_name = socket.getservbyport(port, "tcp")
                     except:
                         service_name = "unknown"
                     
-                    # 2. BANNER GRABBING (Capture Service Version)
                     banner = ""
                     try:
-                        # Send a trigger request for HTTP ports
                         if port in [80, 8080, 443]:
                             sock.send(b'HEAD / HTTP/1.0\r\n\r\n')
-                        
-                        # Read the response (SSH, FTP, SMTP speak first)
                         banner_bytes = sock.recv(1024)
-                        
-                        # Clean data and take the first line
                         banner = banner_bytes.decode('utf-8', errors='ignore').strip().split('\n')[0]
                     except:
-                        pass # Leave empty if no banner is received
+                        pass
                     
-                    # Format Output
                     if banner:
                         display_msg = f"✅ OPEN: Port {port} ({service_name}) | 📝 {banner}"
                     else:
@@ -61,7 +50,6 @@ class PortScannerWorker(QThread):
                     
                     self.update_signal.emit(display_msg)
                     open_ports += 1
-                
                 sock.close()
             except Exception as e:
                 pass
@@ -90,7 +78,6 @@ class SysAdminToolbox(QMainWindow):
     def __init__(self):
         super().__init__()
         
-        # --- PATH CONFIG ---
         if hasattr(sys, '_MEIPASS'):
             self.base_dir = sys._MEIPASS
         else:
@@ -98,20 +85,14 @@ class SysAdminToolbox(QMainWindow):
         
         ui_path = os.path.join(self.base_dir, "assets", "toolbox.ui")
         
-        # Database Directory
         self.data_dir = os.path.join(os.getcwd(), "data")
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
         self.db_path = os.path.join(self.data_dir, "fim_baseline.db")
         
-        # Load UI
         uic.loadUi(ui_path, self)
 
-        # ---------------------------------------------------------
-        # BUTTON CONNECTIONS
-        # ---------------------------------------------------------
-        
-        # 1. Dashboard Buttons (Check for _2 suffix for Qt Designer compatibility)
+        # 1. Dashboard Buttons
         try:
             self.btn_monitor_2.clicked.connect(self.run_monitor)
             self.btn_disk_2.clicked.connect(self.run_disk)
@@ -121,7 +102,6 @@ class SysAdminToolbox(QMainWindow):
             self.btn_backup_2.clicked.connect(self.run_backup)
             self.btn_battery_2.clicked.connect(self.run_battery)
         except AttributeError:
-            # Fallback for non-_2 versions
             try:
                 self.btn_monitor.clicked.connect(self.run_monitor)
                 self.btn_disk.clicked.connect(self.run_disk)
@@ -146,33 +126,25 @@ class SysAdminToolbox(QMainWindow):
             except AttributeError:
                 pass
 
-        # 3. Network Scanner & PDF Context Menu
+        # 3. Network Scanner
         try:
             self.btn_scan.clicked.connect(self.start_port_scan)
-            self.text_scan_result.setReadOnly(True) # Prevent user from typing
-            
-            # --- ENABLE RIGHT CLICK MENU ---
+            self.text_scan_result.setReadOnly(True)
             self.text_scan_result.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
             self.text_scan_result.customContextMenuRequested.connect(self.show_context_menu)
-            # -------------------------------
-            
         except AttributeError:
             print("⚠️ Error: Network Scanner buttons missing.")
 
-        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.6 (PDF Report)")
+        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.6.1 (Fix: FIM)")
 
-    # --- CONTEXT MENU (Right Click) ---
     def show_context_menu(self, pos: QPoint):
         menu = QMenu(self)
         export_action = menu.addAction("📄 Export to PDF")
         action = menu.exec(self.text_scan_result.mapToGlobal(pos))
-        
         if action == export_action:
             self.export_pdf()
 
-    # --- PDF EXPORT FUNCTION ---
     def export_pdf(self):
-        # Get raw text
         content = self.text_scan_result.toPlainText()
         target_ip = self.input_ip.text()
         
@@ -184,83 +156,53 @@ class SysAdminToolbox(QMainWindow):
         
         if file_name:
             try:
-                # 1. SANITIZE: Replace Emojis and Special Chars for PDF compatibility
-                # FPDF standard fonts (Courier, Arial) do not support Emojis.
                 replacements = {
-                    "✅": "[+]", 
-                    "❌": "[-]", 
-                    "🚀": ">>>", 
-                    "📡": "[*]", 
-                    "📝": "->", 
-                    "🚫": "[!]", 
-                    "🏁": "[FINISH]",
-                    "🔵": "[*]",
-                    "⚠️": "[WARN]",
-                    # Convert Turkish/Special chars to safe Latin characters
-                    "İ": "I", "ı": "i", "ğ": "g", "Ğ": "G",
-                    "ş": "s", "Ş": "S", "ç": "c", "Ç": "C",
-                    "ö": "o", "Ö": "O", "ü": "u", "Ü": "U"
+                    "✅": "[+]", "❌": "[-]", "🚀": ">>>", "📡": "[*]", 
+                    "📝": "->", "🚫": "[!]", "🏁": "[FINISH]", "🔵": "[*]", "⚠️": "[WARN]",
+                    "İ": "I", "ı": "i", "ğ": "g", "Ğ": "G", "ş": "s", "Ş": "S", 
+                    "ç": "c", "Ç": "C", "ö": "o", "Ö": "O", "ü": "u", "Ü": "U"
                 }
-                
                 safe_content = content
                 for original, replacement in replacements.items():
                     safe_content = safe_content.replace(original, replacement)
-                
-                # Final Guarantee: Encode to Latin-1 and ignore errors
                 safe_content = safe_content.encode('latin-1', 'ignore').decode('latin-1')
 
-                # 2. GENERATE PDF
                 pdf = PDFReport()
                 pdf.add_page()
                 pdf.set_font("Arial", size=12)
-                
-                # Metadata
                 pdf.cell(0, 10, f"Target IP: {target_ip}", 0, 1)
                 pdf.cell(0, 10, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 0, 1)
                 pdf.ln(10)
-                
-                # Scan Results (Use Courier for Monospace alignment)
                 pdf.set_font("Courier", size=10) 
                 pdf.multi_cell(0, 10, safe_content)
-                
                 pdf.output(file_name)
                 self.text_scan_result.append(f"\n💾 Report saved: {file_name}")
-                
             except Exception as e:
                 self.text_scan_result.append(f"\n❌ PDF Error: {str(e)}")
 
-    # --- COMMAND ENGINE ---
     def run_command(self, command):
-        # Dashboard screen (can be text_output or text_output_2)
         output_widget = getattr(self, "text_output", getattr(self, "text_output_2", None))
-        
         if output_widget:
             output_widget.clear()
             output_widget.append(f"> Executing: {command}\n")
             output_widget.repaint()
-            
             try:
                 result = subprocess.check_output(command, shell=True, text=True, stderr=subprocess.STDOUT, cwd=self.base_dir)
                 output_widget.append(result)
             except subprocess.CalledProcessError as e:
                 output_widget.append(f"❌ Error (Code {e.returncode}):\n{e.output}\n")
-            
             scrollbar = output_widget.verticalScrollBar()
             scrollbar.setValue(scrollbar.maximum())
 
-    # --- NETWORK SCANNER ---
     def start_port_scan(self):
         target_ip = self.input_ip.text().strip()
         if not target_ip:
             target_ip = "127.0.0.1"
             self.input_ip.setText(target_ip)
-        
         self.output_area = self.text_scan_result
         self.output_area.clear()
         self.output_area.append(f"📡 Initializing Deep Scan on {target_ip}...\n")
-        
         self.btn_scan.setEnabled(False)
-        
         self.worker = PortScannerWorker(target_ip)
         self.worker.update_signal.connect(self.update_scan_log)
         self.worker.finished_signal.connect(self.scan_finished)
@@ -268,7 +210,6 @@ class SysAdminToolbox(QMainWindow):
 
     def update_scan_log(self, message):
         if "OPEN" in message:
-            # Highlight if banner is present
             if "|" in message:
                 self.output_area.append(f"<span style='color:#00ff00; font-weight:bold;'>{message}</span>")
             else:
@@ -280,7 +221,6 @@ class SysAdminToolbox(QMainWindow):
         self.btn_scan.setEnabled(True)
         self.output_area.append("\n✅ <b style='color:white;'>Scan Finished. (Right-click to Export PDF)</b>")
 
-    # --- SYSTEM FUNCTIONS ---
     def run_monitor(self):
         self.run_command("echo '--- Kernel ---'; uname -r; echo ''; echo '--- Uptime ---'; uptime -p; echo ''; echo '--- Memory ---'; free -h")
     
@@ -290,7 +230,14 @@ class SysAdminToolbox(QMainWindow):
         self.run_command(cmd)
 
     def run_fim_init(self):
-        self.run_command(f"rm -f data/fim_baseline.db; sha256sum *.txt *.sh src/*.py > data/fim_baseline.db 2>/dev/null && echo '✅ Baseline Created!'")
+        cmd = (
+            "rm -f data/fim_baseline.db; "
+            "find . -maxdepth 2 -type f \\( -name '*.txt' -o -name '*.sh' -o -name '*.py' \\) "
+            "-not -path '*/.*' "
+            "-exec sha256sum {} + > data/fim_baseline.db 2>/dev/null && "
+            "echo '✅ Baseline Created!'"
+        )
+        self.run_command(cmd)
 
     def run_fim_check(self):
         if not os.path.exists(self.db_path):
@@ -317,9 +264,7 @@ class SysAdminToolbox(QMainWindow):
         cmd = r"upower -i $(upower -e | grep 'BAT' | head -n 1) | grep -E 'state|to full|percentage|capacity' || true"
         self.run_command(cmd)
 
-    # --- SERVICE MANAGER ---
     def get_service_name(self):
-        # Automatic detection of _2 or normal suffix
         try:
             name = self.input_service_2.text().strip()
         except AttributeError:
@@ -327,9 +272,7 @@ class SysAdminToolbox(QMainWindow):
                 name = self.input_service.text().strip()
             except AttributeError:
                 name = ""
-        
         if not name:
-            # Trick to print warning to correct screen
             self.run_command("echo '⚠️ Enter service name.'")
             return None
         return name
