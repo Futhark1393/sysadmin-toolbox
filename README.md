@@ -1,4 +1,4 @@
-# SysAdmin Toolbox 🛠️ v2.5 (Banner Grabbing Edition)
+# SysAdmin Toolbox 🛠️ v2.6 (PDF Report Edition)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -16,17 +16,22 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
 ![Dashboard Screenshot](screenshots/dashboard.png)
 *Real-time monitoring, service management, and security logs.*
 
-### 2. Network Scanner (Banner Grabbing)
+### 2. Network Scanner (Banner Grabbing & Reporting)
 ![Scanner Screenshot](screenshots/scanner.png)
-*Multi-threaded port scanner with **Service Version Detection** (Banner Grabbing).*
+*Multi-threaded port scanner with **PDF Export** capabilities.*
 
 ---
 
-## 🚀 Features
+## 🚀 What's New in v2.6?
 
-### 🕵️‍♂️ Network & Security (v2.5 Update)
+### 📄 Professional PDF Reporting
+* **Export Scan Results:** Right-click on the scan results to save them as a professional PDF report.
+* **Auto-Sanitization:** Automatically converts emojis (e.g., ✅, 🚀) into text-safe format (e.g., `[+]`, `>>>`) to ensure compatibility with all PDF readers.
+* **Context Menu:** Native right-click integration for easy export.
+
+### 🕵️‍♂️ Network & Security
 * **Advanced Port Scanner:** Multithreaded scanning preventing UI freeze.
-* **Banner Grabbing (New!):** Detects service versions (e.g., `SSH-2.0-OpenSSH_8.7`) running on open ports.
+* **Banner Grabbing:** Detects service versions (e.g., `SSH-2.0-OpenSSH_8.7`) running on open ports.
 * **Log Analyzer (IDS):** Detects SSH brute-force attacks and Sudo violations.
 * **File Integrity Monitor (FIM):** Automatically creates baselines and detects unauthorized file changes.
 
@@ -34,12 +39,9 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
 * **Tabbed Interface:** Clean separation between System Dashboard and Network Tools.
 * **Service Manager:** Start, Stop, and Restart systemd services (e.g., `sshd`, `cron`) with root privileges (`pkexec`).
 * **System Monitor:** Real-time kernel, uptime, and RAM usage stats.
-* **Disk & Battery:** Partition analysis and battery health checks.
 * **Automated Backups:** Easy-to-use directory backup tool.
 
 ## 📂 Project Structure
-
-We follow a clean, standard Linux project hierarchy:
 
 ```text
 sysadmin-toolbox/
@@ -48,8 +50,6 @@ sysadmin-toolbox/
 ├── assets/         # UI Resources
 │   └── toolbox.ui
 ├── screenshots/    # Project Images
-│   ├── dashboard.png
-│   └── scanner.png
 ├── data/           # Databases & Logs (Generated files)
 │   └── fim_baseline.db
 ├── install.sh      # Desktop Installer
@@ -70,13 +70,14 @@ Designed for **Fedora Linux**, but compatible with most systemd-based distributi
 ### GUI Requirements
 * `python3`
 * `PyQt6` (Fedora: `sudo dnf install python3-pyqt6`)
+* `fpdf2` (For PDF Generation: `pip install fpdf2`)
 * `polkit` (For `pkexec` password prompts in GUI)
 
 ## 📦 Installation & Usage
 
 Clone the repository:
 ```bash
-git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
+git clone https://github.com/Futhark1393/sysadmin-toolbox.git
 cd sysadmin-toolbox
 ```
 
@@ -85,9 +86,10 @@ cd sysadmin-toolbox
 ### 🎨 Option 1: GUI Mode (Recommended)
 Add the application to your system menu for easy access.
 
-**Step 1: Install Dependencies**
+**Step 1: Install Python Dependencies**
 ```bash
 sudo dnf install python3-pyqt6
+pip install fpdf2
 ```
 
 **Step 2: Run the Installer**
@@ -105,7 +107,7 @@ Build a single executable file that runs without Python installed.
 
 **Step 1: Install PyInstaller**
 ```bash
-pip install pyinstaller
+pip install pyinstaller fpdf2
 ```
 
 **Step 2: Build the Project**
@@ -138,16 +140,6 @@ To remove the desktop shortcut and clean up generated data:
 chmod +x uninstall.sh
 ./uninstall.sh
 ```
-*(Then you can safely delete the project folder if desired.)*
-
-## 🧠 Learning Outcomes
-
-By building this tool, I mastered:
-* **PyQt6 & Qt Designer:** Creating complex, tabbed user interfaces.
-* **Socket Programming:** Implementing raw socket connections for network analysis.
-* **Multithreading (`QThread`):** Running background tasks without freezing the UI.
-* **Hybrid Architecture:** Connecting Python GUI with Bash system commands.
-* **Software Packaging:** Building portable binaries with **PyInstaller**.
 
 ## ⚠️ Legal Disclaimer
 
@@ -161,4 +153,3 @@ This tool is designed for system administrators and security enthusiasts to audi
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
-

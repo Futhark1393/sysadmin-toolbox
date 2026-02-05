@@ -4,8 +4,9 @@ import os
 import socket
 from datetime import datetime
 from PyQt6 import uic
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu
+from PyQt6.QtCore import QThread, pyqtSignal, Qt, QPoint
+from fpdf import FPDF
 
 # --- WORKER THREAD (For Port Scanner & Banner Grabbing) ---
 # Performs background scanning and information gathering without freezing the UI
@@ -72,6 +73,18 @@ class PortScannerWorker(QThread):
         
         self.finished_signal.emit()
 
+# --- PDF REPORT GENERATOR CLASS ---
+class PDFReport(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 15)
+        self.cell(0, 10, 'SysAdmin Toolbox - Security Scan Report', 0, 1, 'C')
+        self.ln(5)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+
 # --- MAIN APPLICATION ---
 class SysAdminToolbox(QMainWindow):
     def __init__(self):
@@ -108,7 +121,7 @@ class SysAdminToolbox(QMainWindow):
             self.btn_backup_2.clicked.connect(self.run_backup)
             self.btn_battery_2.clicked.connect(self.run_battery)
         except AttributeError:
-            # Fallback for non-_2 versions (Old design or manual fix)
+            # Fallback for non-_2 versions
             try:
                 self.btn_monitor.clicked.connect(self.run_monitor)
                 self.btn_disk.clicked.connect(self.run_disk)
@@ -133,14 +146,88 @@ class SysAdminToolbox(QMainWindow):
             except AttributeError:
                 pass
 
-        # 3. Network Scanner
+        # 3. Network Scanner & PDF Context Menu
         try:
             self.btn_scan.clicked.connect(self.start_port_scan)
-            self.text_scan_result.setReadOnly(True) # Prevent user from typing in result screen
+            self.text_scan_result.setReadOnly(True) # Prevent user from typing
+            
+            # --- ENABLE RIGHT CLICK MENU ---
+            self.text_scan_result.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            self.text_scan_result.customContextMenuRequested.connect(self.show_context_menu)
+            # -------------------------------
+            
         except AttributeError:
             print("⚠️ Error: Network Scanner buttons missing.")
 
-        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.5")
+        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.6 (PDF Report)")
+
+    # --- CONTEXT MENU (Right Click) ---
+    def show_context_menu(self, pos: QPoint):
+        menu = QMenu(self)
+        export_action = menu.addAction("📄 Export to PDF")
+        action = menu.exec(self.text_scan_result.mapToGlobal(pos))
+        
+        if action == export_action:
+            self.export_pdf()
+
+    # --- PDF EXPORT FUNCTION ---
+    def export_pdf(self):
+        # Get raw text
+        content = self.text_scan_result.toPlainText()
+        target_ip = self.input_ip.text()
+        
+        if not content.strip():
+            self.run_command("echo '⚠️ No scan data to export!'")
+            return
+
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save Report", f"ScanReport_{target_ip}.pdf", "PDF Files (*.pdf)")
+        
+        if file_name:
+            try:
+                # 1. SANITIZE: Replace Emojis and Special Chars for PDF compatibility
+                # FPDF standard fonts (Courier, Arial) do not support Emojis.
+                replacements = {
+                    "✅": "[+]", 
+                    "❌": "[-]", 
+                    "🚀": ">>>", 
+                    "📡": "[*]", 
+                    "📝": "->", 
+                    "🚫": "[!]", 
+                    "🏁": "[FINISH]",
+                    "🔵": "[*]",
+                    "⚠️": "[WARN]",
+                    # Convert Turkish/Special chars to safe Latin characters
+                    "İ": "I", "ı": "i", "ğ": "g", "Ğ": "G",
+                    "ş": "s", "Ş": "S", "ç": "c", "Ç": "C",
+                    "ö": "o", "Ö": "O", "ü": "u", "Ü": "U"
+                }
+                
+                safe_content = content
+                for original, replacement in replacements.items():
+                    safe_content = safe_content.replace(original, replacement)
+                
+                # Final Guarantee: Encode to Latin-1 and ignore errors
+                safe_content = safe_content.encode('latin-1', 'ignore').decode('latin-1')
+
+                # 2. GENERATE PDF
+                pdf = PDFReport()
+                pdf.add_page()
+                pdf.set_font("Arial", size=12)
+                
+                # Metadata
+                pdf.cell(0, 10, f"Target IP: {target_ip}", 0, 1)
+                pdf.cell(0, 10, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 0, 1)
+                pdf.ln(10)
+                
+                # Scan Results (Use Courier for Monospace alignment)
+                pdf.set_font("Courier", size=10) 
+                pdf.multi_cell(0, 10, safe_content)
+                
+                pdf.output(file_name)
+                self.text_scan_result.append(f"\n💾 Report saved: {file_name}")
+                
+            except Exception as e:
+                self.text_scan_result.append(f"\n❌ PDF Error: {str(e)}")
 
     # --- COMMAND ENGINE ---
     def run_command(self, command):
@@ -191,7 +278,7 @@ class SysAdminToolbox(QMainWindow):
 
     def scan_finished(self):
         self.btn_scan.setEnabled(True)
-        self.output_area.append("\n✅ <b style='color:white;'>Scan Finished.</b>")
+        self.output_area.append("\n✅ <b style='color:white;'>Scan Finished. (Right-click to Export PDF)</b>")
 
     # --- SYSTEM FUNCTIONS ---
     def run_monitor(self):
