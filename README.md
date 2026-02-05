@@ -18,75 +18,105 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
     * **Sudo Violation Monitor:** Detects unauthorized root access attempts.
 * **File Integrity Monitor (FIM):**
     * **Auto-Baseline:** Automatically secures `.txt`, `.sh`, and `.py` files.
+    * **Centralized Data:** Uses `data/` directory for database synchronization between CLI and GUI.
     * **Integrity Check:** Instantly detects silent file modifications or deletions.
 
 ### ⚙️ System Utilities
-* **Service Manager (Systemd):** **[NEW]** Manage Linux services (e.g., `sshd`, `cron`) directly.
+* **Service Manager (Systemd):** Manage Linux services (e.g., `sshd`, `cron`) directly.
     * **Actions:** Check Status, Start, Stop, and Restart services.
     * **Privilege Handling:** Uses `pkexec` (GUI) or `sudo` (CLI) for secure root authentication.
 * **System Monitor:** Real-time kernel, uptime, load average, and RAM usage.
 * **Disk Usage Analyzer:** Scans partitions and detects large files (>100MB) in logs.
 * **Battery Health:** Displays battery percentage, status, and capacity (optimized for primary battery detection).
-* **Automated Backups:**
-    * *CLI:* Manual path entry.
-    * *GUI:* Modern file-picker dialog to select backup targets easily.
+* **Automated Backups:** Modern file-picker dialog (GUI) or manual path entry (CLI).
 
-## 📋 Requirements
+## 📂 Project Structure
 
-Designed for **Fedora Linux**, but compatible with most systemd-based distributions.
+We follow a clean, standard Linux project hierarchy:
 
-### Core Requirements
-* `bash` (4.0+)
-* `journalctl` (For Log Analysis)
-* `systemctl` (For Service Management)
-* `sha256sum` (For FIM)
-* `upower` (For Battery Check)
+```text
+sysadmin-toolbox/
+├── src/            # Source Code (Python Logic)
+│   └── main_gui.py
+├── assets/         # UI Resources
+│   └── toolbox.ui
+├── data/           # Databases & Logs (Generated files)
+│   └── fim_baseline.db
+├── install.sh      # Desktop Installer
+├── uninstall.sh    # Uninstaller
+└── toolbox.sh      # CLI Version (Bash Script)
+```
 
-### GUI Requirements (Python)
-* `python3`
-* `PyQt6` (Can be installed via DNF on Fedora: `sudo dnf install python3-pyqt6`)
-* `polkit` (For `pkexec` password prompts in GUI)
+### 📋 Requirements
 
-## 📦 Installation & Usage
+Designed for Fedora Linux, but compatible with most systemd-based distributions.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
-    cd sysadmin-toolbox
-    ```
+* **Core Requirements**
 
-### 🖥️ Option 1: Terminal Mode (CLI)
-Best for headless servers or quick access.
+   * **bash (4.0+)**
+   * **journalctl & systemctl**
+   * **sha256sum**
+   * **upower**
+   
+* **GUI Requirements**
 
-1.  **Make executable:**
-    ```bash
-    chmod +x toolbox.sh
-    ```
-2.  **Run:**
-    ```bash
-    ./toolbox.sh
-    ```
+   * **python3**
+   * **PyQt6 (Fedora: sudo dnf install python3-pyqt6)**
+   * **polkit (For pkexec password prompts in GUI)**
+   
+### 📦 Installation & Usage
 
-### 🎨 Option 2: Graphical Mode (GUI)
-Best for desktop experience with visual reports.
+**1. Clone the repository:**
+```bash
+git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
+cd sysadmin-toolbox
+```
 
-1.  **Install Dependencies:**
-    ```bash
-    sudo dnf install python3-pyqt6
-    ```
-2.  **Run:**
-    ```bash
-    python3 main_gui.py
-    ```
+### 🎨 GUI Mode (Recommended)
 
-## 🧠 Learning Outcomes
+Add the application to your system menu for easy access.
 
-By building this tool, I mastered:
-* **Hybrid Development:** Integrating Bash logic into Python automation.
-* **Systemd Management:** Interacting with Linux services and handling status codes.
-* **Privilege Escalation in GUI:** Using `pkexec` to run specific commands as root within a graphical app.
-* **Cyber Security:** Implementing Intrusion Detection Systems (IDS) and File Integrity Monitoring.
+**1. Install Dependencies:**
+```bash
+sudo dnf install python3-pyqt6
+```
 
-## 📄 License
+**2. Run the Installer: This script creates a dynamic desktop shortcut.**
+```bash
+chmod +x install.sh
+./install.sh
+```
+🎉 Now simply search for "SysAdmin Toolbox" in your Application Menu!
 
-This project is open source and available under the [MIT License](LICENSE).
+**3. (Optional) Run directly without installing:**
+
+### 🖥️ CLI Mode (Terminal) 
+Best for headless servers or quick SSH access.
+
+**1. Run:**
+```bash
+chmod +x toolbox.sh
+./toolbox.sh
+```
+
+### 🗑️ Uninstallation
+To remove the desktop shortcut and clean up generated data:
+```bash
+chmod +x uninstall.sh
+./uninstall.sh
+```
+(Then you can safely delete the project folder if desired.)
+
+### 🧠 Learning Outcomes
+
+* **By building this tool, I mastered:**
+
+   * Hybrid Development: Integrating Bash logic into Python automation.
+   * Project Architecture: Structuring files into src, assets, and data for scalability.
+   * Desktop Integration: Writing dynamic .desktop installers and uninstallers.
+   * Systemd Management: Interacting with Linux services and handling status codes.
+   * Cyber Security: Implementing Intrusion Detection Systems (IDS) and FIM.
+
+### 📄 License
+This project is open source and available under the MIT License.
+
