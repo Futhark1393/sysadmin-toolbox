@@ -9,13 +9,30 @@ class SysAdminToolbox(QMainWindow):
     def __init__(self):
         super().__init__()
         
-        # --- YOL AYARLARI (PATH CONFIG) ---
-        # Bu dosya 'src' içinde olduğu için, proje kök dizini bir üsttedir (..).
-        # Proje Kök Dizini: /home/user/sysadmin-toolbox/
-        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # --- PYINSTALLER İÇİN YOL AYARI (PATH FIX) ---
+        # PyInstaller çalışınca dosyaları geçici bir klasöre (_MEIPASS) açar.
+        # Normal çalışınca ise mevcut klasöre bakar.
+        if hasattr(sys, '_MEIPASS'):
+            # PyInstaller ile paketlenmişse:
+            self.base_dir = sys._MEIPASS
+        else:
+            # Normal Python ile çalışıyorsa:
+            self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
-        # UI Dosyası: assets/toolbox.ui
+        # UI Dosyası Yolu (assets klasörü içine bak)
         ui_path = os.path.join(self.base_dir, "assets", "toolbox.ui")
+        
+        # Veritabanı Dosyası (Veriler her zaman çalışılan dizindeki data klasöründe olmalı)
+        # Not: Veritabanını _MEIPASS içine atamayız çünkü orası sadece okunabilir ve geçicidir.
+        # Bu yüzden veritabanı için 'os.getcwd()' yani kullanıcının olduğu yeri kullanacağız.
+        self.data_dir = os.path.join(os.getcwd(), "data")
+        if not os.path.exists(self.data_dir):
+            os.makedirs(self.data_dir) # Klasör yoksa oluştur
+            
+        self.db_path = os.path.join(self.data_dir, "fim_baseline.db")
+        
+        # Tasarımı Yükle
+        uic.loadUi(ui_path, self)
         
         # Veritabanı Dosyası: data/fim_baseline.db
         # (Tam yol kullanıyoruz ki program nereden çalışırsa çalışsın bulabilsin)
