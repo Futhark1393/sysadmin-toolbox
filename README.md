@@ -47,85 +47,80 @@ sysadmin-toolbox/
 └── toolbox.sh      # CLI Version (Bash Script)
 ```
 
-### 📋 Requirements
+## 📋 Requirements
 
-Designed for Fedora Linux, but compatible with most systemd-based distributions.
-* **Core Requirements**
+Designed for **Fedora Linux**, but compatible with most systemd-based distributions.
 
-   * **bash (4.0+)**
-   * **journalctl & systemctl**
-   * **sha256sum**
-   * **upower**
+### Core Requirements
+* `bash` (4.0+)
+* `journalctl` & `systemctl`
+* `sha256sum`
+* `upower`
 
-* **GUI Requirements**
+### GUI Requirements
+* `python3`
+* `PyQt6` (Fedora: `sudo dnf install python3-pyqt6`)
+* `polkit` (For `pkexec` password prompts in GUI)
 
-   * **python3**
-   * **PyQt6 (Fedora: sudo dnf install python3-pyqt6)**
-   * **polkit (For pkexec password prompts in GUI)**
+## 📦 Installation & Usage
 
-### 📦 Installation & Usage
+Clone the repository:
+```bash
+git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
+cd sysadmin-toolbox
+```
 
-    Clone the repository:
-    
-    ```bash
-
-    git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
-    cd sysadmin-toolbox
-    ```
+---
 
 ### 🎨 Option 1: GUI Mode (Recommended)
-
 Add the application to your system menu for easy access.
 
-    Install Dependencies:
-    
-    ```bash
-    sudo dnf install python3-pyqt6
-    ```
-    
-    Run the Installer: This script creates a dynamic desktop shortcut.
-    
-    ```bash
-    chmod +x install.sh
-    ./install.sh
-    ```
+**Step 1: Install Dependencies**
+```bash
+sudo dnf install python3-pyqt6
+```
 
-    🎉 Now simply search for "SysAdmin Toolbox" in your Application Menu!
+**Step 2: Run the Installer**
+This script creates a dynamic desktop shortcut.
+```bash
+chmod +x install.sh
+./install.sh
+```
+*🎉 Now simply search for **"SysAdmin Toolbox"** in your Application Menu!*
+
+---
 
 ### 🎒 Option 2: Portable Binary (Standalone)
-
 Build a single executable file that runs without Python installed.
 
-    Install PyInstaller:
-    
-    ```bash
-    pip install pyinstaller
-    ```
+**Step 1: Install PyInstaller**
+```bash
+pip install pyinstaller
+```
 
-    Build the Project:
-    
-    ```bash
-    pyinstaller --name "SysAdminToolbox" --onefile --windowed --add-data "assets/toolbox.ui:assets" src/main_gui.py
-    ```
+**Step 2: Build the Project**
+```bash
+pyinstaller --name "SysAdminToolbox" --onefile --windowed --add-data "assets/toolbox.ui:assets" src/main_gui.py
+```
 
-    Run: The executable is generated in the dist/ folder.
-    
-    ```bash
-    ./dist/SysAdminToolbox
-    ```
+**Step 3: Run**
+The executable is generated in the `dist/` folder.
+```bash
+./dist/SysAdminToolbox
+```
+
+---
 
 ### 🖥️ Option 3: CLI Mode (Terminal)
-
 Best for headless servers or quick SSH access.
 
-    Run:
-    
-    ```bash
-    chmod +x toolbox.sh
-    ./toolbox.sh
-    ```
+**Run:**
+```bash
+chmod +x toolbox.sh
+./toolbox.sh
+```
 
-### 🗑️ Uninstallation
+## 🗑️ Uninstallation
 
 To remove the desktop shortcut and clean up generated data:
 
@@ -133,23 +128,17 @@ To remove the desktop shortcut and clean up generated data:
 chmod +x uninstall.sh
 ./uninstall.sh
 ```
+*(Then you can safely delete the project folder if desired.)*
 
-(Then you can safely delete the project folder if desired.)
-
-### 🧠 Learning Outcomes
+## 🧠 Learning Outcomes
 
 By building this tool, I mastered:
+* **Hybrid Development:** Integrating Bash logic into Python automation.
+* **Project Architecture:** Structuring files into `src`, `assets`, and `data` for scalability.
+* **Software Packaging:** Creating portable Linux binaries using **PyInstaller**.
+* **Systemd Management:** Interacting with Linux services and handling status codes.
+* **Cyber Security:** Implementing Intrusion Detection Systems (IDS) and FIM.
 
-    Hybrid Development: Integrating Bash logic into Python automation.
+## 📄 License
 
-    Project Architecture: Structuring files into src, assets, and data for scalability.
-
-    Software Packaging: Creating portable Linux binaries using PyInstaller.
-
-    Systemd Management: Interacting with Linux services and handling status codes.
-
-    Cyber Security: Implementing Intrusion Detection Systems (IDS) and FIM.
-
-📄 License
-
-This project is open source and available under the MIT License.
+This project is open source and available under the [MIT License](LICENSE).
