@@ -1,38 +1,46 @@
-# SysAdmin Toolbox 🛠️ v1.2
+# SysAdmin Toolbox 🛠️ v2.0 (Hybrid Edition)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Qt](https://img.shields.io/badge/GUI-PyQt6-41CD52?style=for-the-badge&logo=qt&logoColor=white)
 ![Security](https://img.shields.io/badge/Security-Blue_Team-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-A lightweight CLI tool for system monitoring, automated backups, and **comprehensive security auditing** on Linux systems.
+A powerful system administration tool designed for Linux (Fedora), featuring both a **Classic CLI (Terminal)** and a **Modern GUI (Graphical Interface)**.
 
-> **🎓 Educational Project:** This tool was developed as a capstone project for my **Bash Scripting Learning Journey**. It demonstrates core concepts like log parsing (`journalctl`), file integrity hashing (`sha256sum`), and modular script architecture.
+> **🎓 Educational Project:** This tool represents my journey from **Bash Scripting** to **Python GUI Development**. It combines system-level commands with a user-friendly interface to perform security audits, monitoring, and backups.
 
 ## 🚀 Features
 
 ### 🛡️ Security Modules
-* **Advanced Log Analyzer (Intrusion Detection):** **[NEW]** Audits system logs for potential threats.
-    * **SSH Brute-Force Detection:** Tracks failed login attempts, invalid username trials, and identifies top attacking IPs.
-    * **Sudo Violation Monitor:** Detects unauthorized root access attempts and privilege escalation incidents.
-    * **Detailed Reporting:** Provides timestamps, usernames, and IP addresses for every alert.
-* **File Integrity Monitor (FIM):** Detects unauthorized file changes using SHA256 hashing.
-    * *Init Mode:* Creates a secure baseline of critical files.
-    * *Check Mode:* Scans for silent modifications or deletions.
+* **Advanced Log Analyzer (Intrusion Detection):**
+    * **SSH Brute-Force Detection:** Tracks failed logins and identifies attacking IPs.
+    * **Sudo Violation Monitor:** Detects unauthorized root access attempts.
+* **File Integrity Monitor (FIM):**
+    * **Auto-Baseline:** Automatically secures `.txt`, `.sh`, and `.py` files.
+    * **Integrity Check:** Instantly detects silent file modifications or deletions.
 
 ### ⚙️ System Utilities
-* **System Information:** Displays kernel version, uptime, load average, and memory usage.
-* **Disk Usage Analyzer:** Calculates partition usage and intelligently scans for large files (>100MB).
-* **Battery Health Monitor:** Checks battery capacity and status (using `upower`).
-* **Automated Backups:** Archives specific directories into `.tar.gz` format with timestamping.
+* **System Monitor:** Real-time kernel, uptime, load average, and RAM usage.
+* **Disk Usage Analyzer:** Scans partitions and detects large files (>100MB) in logs.
+* **Battery Health:** Displays battery percentage, status, and capacity (GUI exclusive features included).
+* **Automated Backups:**
+    * *CLI:* Manual path entry.
+    * *GUI:* Modern file-picker dialog to select backup targets easily.
 
 ## 📋 Requirements
 
-Designed for **Fedora Linux** (uses `journalctl`), but compatible with most systemd-based distributions.
+Designed for **Fedora Linux**, but compatible with most systemd-based distributions.
 
+### Core Requirements
 * `bash` (4.0+)
 * `journalctl` (For Log Analysis)
 * `sha256sum` (For FIM)
-* `bc` & `upower` (For utilities)
+* `upower` (For Battery Check)
+
+### GUI Requirements (Python)
+* `python3`
+* `PyQt6` (Can be installed via DNF on Fedora)
 
 ## 📦 Installation & Usage
 
@@ -42,22 +50,39 @@ Designed for **Fedora Linux** (uses `journalctl`), but compatible with most syst
     cd sysadmin-toolbox
     ```
 
-2.  **Make the script executable:**
+### 🖥️ Option 1: Terminal Mode (CLI)
+Best for headless servers or quick access.
+
+1.  **Make executable:**
     ```bash
     chmod +x toolbox.sh
     ```
-
-3.  **Run the tool:**
+2.  **Run:**
     ```bash
     ./toolbox.sh
     ```
 
+### 🎨 Option 2: Graphical Mode (GUI)
+Best for desktop experience with visual reports.
+
+1.  **Install Dependencies (Fedora):**
+    ```bash
+    sudo dnf install python3-pyqt6
+    ```
+    *(Or via pip: `pip install PyQt6` in a virtual environment)*
+
+2.  **Run:**
+    ```bash
+    python3 main_gui.py
+    ```
+
 ## 🧠 Learning Outcomes
 
-By building this tool, I practiced:
-* **Cyber Security:** Log analysis for intrusion detection and File Integrity Monitoring (FIM).
-* **System Administration:** Parsing system logs (`journalctl`), user management, and process monitoring.
-* **Bash Scripting:** Advanced text processing (`awk`, `grep`, `sed`), functions, and interactive menus.
+By building this tool, I mastered:
+* **Hybrid Development:** Integrating Bash logic into Python automation.
+* **GUI Design:** Using **Qt Designer** for frontend and Python (`subprocess`) for backend logic.
+* **Cyber Security:** Implementing Intrusion Detection Systems (IDS) and File Integrity Monitoring.
+* **Linux System Internals:** Deep diving into `/var/log`, `journalctl`, and process management.
 
 ## 📄 License
 
