@@ -1,4 +1,4 @@
-# SysAdmin Toolbox 🛠️ v2.2 (Hybrid Edition)
+# SysAdmin Toolbox 🛠️ v2.4 (Hybrid Edition)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -8,27 +8,33 @@
 
 A powerful system administration tool designed for Linux (Fedora), featuring both a **Classic CLI (Terminal)** and a **Modern GUI (Graphical Interface)**.
 
-> **🎓 Educational Project:** This tool represents my journey from **Bash Scripting** to **Python GUI Development**. It combines system-level commands with a user-friendly interface to perform security audits, monitoring, backups, and **service management**.
+> **🎓 Educational Project:** This tool represents my journey from **Bash Scripting** to **Python GUI Development**. It combines system-level commands with a user-friendly interface to perform security audits, monitoring, backups, and **network scanning**.
+
+## 📸 Screenshots
+
+### 1. The Dashboard (System & Services)
+![Dashboard Screenshot](screenshots/dashboard.png)
+*Real-time monitoring, service management, and security logs.*
+
+### 2. Network Scanner (Port Analysis)
+![Scanner Screenshot](screenshots/scanner.png)
+*Multi-threaded port scanner identifying open ports on target IPs.*
+
+---
 
 ## 🚀 Features
 
-### 🛡️ Security Modules
-* **Advanced Log Analyzer (Intrusion Detection):**
-    * **SSH Brute-Force Detection:** Tracks failed logins and identifies attacking IPs.
-    * **Sudo Violation Monitor:** Detects unauthorized root access attempts.
-* **File Integrity Monitor (FIM):**
-    * **Auto-Baseline:** Automatically secures `.txt`, `.sh`, and `.py` files.
-    * **Centralized Data:** Uses `data/` directory for database synchronization between CLI and GUI.
-    * **Integrity Check:** Instantly detects silent file modifications or deletions.
+### 🕵️‍♂️ Network & Security (New!)
+* **Port Scanner (Multithreaded):** Scans target IPs for open ports (22, 80, 443, etc.) without freezing the UI.
+* **Log Analyzer (IDS):** Detects SSH brute-force attacks and Sudo violations.
+* **File Integrity Monitor (FIM):** Automatically creates baselines and detects unauthorized file changes.
 
 ### ⚙️ System Utilities
-* **Service Manager (Systemd):** Manage Linux services (e.g., `sshd`, `cron`) directly.
-    * **Actions:** Check Status, Start, Stop, and Restart services.
-    * **Privilege Handling:** Uses `pkexec` (GUI) or `sudo` (CLI) for secure root authentication.
-* **System Monitor:** Real-time kernel, uptime, load average, and RAM usage.
-* **Disk Usage Analyzer:** Scans partitions and detects large files (>100MB) in logs.
-* **Battery Health:** Displays battery percentage, status, and capacity (optimized for primary battery detection).
-* **Automated Backups:** Modern file-picker dialog (GUI) or manual path entry (CLI).
+* **Tabbed Interface:** Clean separation between System Dashboard and Network Tools.
+* **Service Manager:** Start, Stop, and Restart systemd services (e.g., `sshd`, `cron`) with root privileges (`pkexec`).
+* **System Monitor:** Real-time kernel, uptime, and RAM usage stats.
+* **Disk & Battery:** Partition analysis and battery health checks.
+* **Automated Backups:** Easy-to-use directory backup tool.
 
 ## 📂 Project Structure
 
@@ -133,11 +139,11 @@ chmod +x uninstall.sh
 ## 🧠 Learning Outcomes
 
 By building this tool, I mastered:
-* **Hybrid Development:** Integrating Bash logic into Python automation.
-* **Project Architecture:** Structuring files into `src`, `assets`, and `data` for scalability.
-* **Software Packaging:** Creating portable Linux binaries using **PyInstaller**.
-* **Systemd Management:** Interacting with Linux services and handling status codes.
-* **Cyber Security:** Implementing Intrusion Detection Systems (IDS) and FIM.
+* **PyQt6 & Qt Designer:** Creating complex, tabbed user interfaces.
+* **Multithreading (`QThread`):** Running network scans in the background without freezing the UI.
+* **Hybrid Architecture:** Connecting Python GUI with Bash system commands.
+* **Software Packaging:** Building portable binaries with **PyInstaller**.
+* **Cyber Security:** Implementing Port Scanning and Intrusion Detection logic.
 
 ## 📄 License
 

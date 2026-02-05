@@ -14,122 +14,178 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTextEdit" name="text_output">
+   <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>10</y>
-      <width>751</width>
-      <height>531</height>
+      <x>0</x>
+      <y>0</y>
+      <width>991</width>
+      <height>561</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: black; color: #39ff14; font-family: Monospace; font-size: 12px;</string>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>199</width>
-      <height>351</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QPushButton" name="btn_monitor">
-       <property name="text">
-        <string>🖥️ System Monitor</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_disk">
-       <property name="text">
-        <string>💾 Disk Usage</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_fim_init">
-       <property name="text">
-        <string>🔒 FIM: Create Baseline</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_fim_check">
-       <property name="text">
-        <string>🕵️‍♂️ FIM: Check Integrity</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_logs">
-       <property name="text">
-        <string>🛡️ Log Analyzer</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_backup">
-       <property name="text">
-        <string>📦 Automated Backup</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_battery">
-       <property name="text">
-        <string>🔋Battery Health</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>360</y>
-      <width>199</width>
-      <height>181</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QLineEdit" name="input_service">
+    <widget class="QWidget" name="tab_1">
+     <attribute name="title">
+      <string>🖥️ Dashboard</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>199</width>
+        <height>321</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QPushButton" name="btn_monitor_2">
+         <property name="text">
+          <string>🖥️ System Monitor</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_disk_2">
+         <property name="text">
+          <string>💾 Disk Usage</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_fim_init_2">
+         <property name="text">
+          <string>🔒 FIM: Create Baseline</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_fim_check_2">
+         <property name="text">
+          <string>🕵️‍♂️ FIM: Check Integrity</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_logs_2">
+         <property name="text">
+          <string>🛡️ Log Analyzer</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_backup_2">
+         <property name="text">
+          <string>📦 Automated Backup</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_battery_2">
+         <property name="text">
+          <string>🔋Battery Health</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QTextEdit" name="text_output">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>20</y>
+        <width>771</width>
+        <height>501</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: black; color: #39ff14; font-family: Monospace; font-size: 12px;</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>340</y>
+        <width>199</width>
+        <height>181</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLineEdit" name="input_service_2">
+         <property name="placeholderText">
+          <string>Enter service name (e.g. sshd)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_svc_status_2">
+         <property name="text">
+          <string>🔍 Check Status</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_svc_restart_2">
+         <property name="text">
+          <string>🔄 Restart Service (Sudo)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_svc_stop_2">
+         <property name="text">
+          <string>🛑 Stop Service (Sudo)</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_7">
+     <attribute name="title">
+      <string>🕵️ Network Scanner</string>
+     </attribute>
+     <widget class="QTextEdit" name="text_scan_result">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>951</width>
+        <height>441</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QSplitter" name="splitter">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>20</y>
+        <width>821</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <widget class="QLineEdit" name="input_ip">
        <property name="placeholderText">
-        <string>Enter service name (e.g. sshd)</string>
+        <string>Target IP (e.g. 192.168.1.1)</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_svc_status">
+      <widget class="QPushButton" name="btn_scan">
        <property name="text">
-        <string>🔍 Check Status</string>
+        <string>🚀 START SCAN</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_svc_restart">
-       <property name="text">
-        <string>🔄 Restart Service (Sudo)</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_svc_stop">
-       <property name="text">
-        <string>🛑 Stop Service (Sudo)</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
