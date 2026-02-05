@@ -149,6 +149,16 @@ By building this tool, I mastered:
 * **Hybrid Architecture:** Connecting Python GUI with Bash system commands.
 * **Software Packaging:** Building portable binaries with **PyInstaller**.
 
+## ⚠️ Legal Disclaimer
+
+**For Educational Purposes Only.**
+This tool is designed for system administrators and security enthusiasts to audit their *own* networks and systems.
+
+* **Do not use this tool on networks or systems you do not own or do not have explicit permission to test.**
+* The author (@Futhark1393) is not responsible for any damage, data loss, or legal consequences caused by the misuse of this tool.
+* By downloading and using this software, you agree to use it responsibly and in accordance with all applicable local and international laws.
+
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
+
