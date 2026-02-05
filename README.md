@@ -66,6 +66,7 @@ Designed for Fedora Linux, but compatible with most systemd-based distributions.
 ### 📦 Installation & Usage
 
     Clone the repository:
+    
     ```bash
 
     git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
@@ -77,11 +78,13 @@ Designed for Fedora Linux, but compatible with most systemd-based distributions.
 Add the application to your system menu for easy access.
 
     Install Dependencies:
+    
     ```bash
     sudo dnf install python3-pyqt6
     ```
     
     Run the Installer: This script creates a dynamic desktop shortcut.
+    
     ```bash
     chmod +x install.sh
     ./install.sh
@@ -94,16 +97,19 @@ Add the application to your system menu for easy access.
 Build a single executable file that runs without Python installed.
 
     Install PyInstaller:
+    
     ```bash
     pip install pyinstaller
     ```
 
     Build the Project:
+    
     ```bash
     pyinstaller --name "SysAdminToolbox" --onefile --windowed --add-data "assets/toolbox.ui:assets" src/main_gui.py
     ```
 
     Run: The executable is generated in the dist/ folder.
+    
     ```bash
     ./dist/SysAdminToolbox
     ```
@@ -113,6 +119,7 @@ Build a single executable file that runs without Python installed.
 Best for headless servers or quick SSH access.
 
     Run:
+    
     ```bash
     chmod +x toolbox.sh
     ./toolbox.sh
@@ -121,6 +128,7 @@ Best for headless servers or quick SSH access.
 ### 🗑️ Uninstallation
 
 To remove the desktop shortcut and clean up generated data:
+
 ```bash
 chmod +x uninstall.sh
 ./uninstall.sh
