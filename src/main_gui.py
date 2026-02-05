@@ -7,7 +7,8 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt6.QtCore import QThread, pyqtSignal
 
-# --- WORKER THREAD (Port Scanner İçin) ---
+# --- WORKER THREAD (For Port Scanner & Banner Grabbing) ---
+# Performs background scanning and information gathering without freezing the UI
 class PortScannerWorker(QThread):
     update_signal = pyqtSignal(str)
     finished_signal = pyqtSignal()
@@ -17,20 +18,49 @@ class PortScannerWorker(QThread):
         self.target_ip = target_ip
 
     def run(self):
-        self.update_signal.emit(f"🚀 Starting scan on {self.target_ip}...\n")
+        self.update_signal.emit(f"🚀 Starting Deep Scan on {self.target_ip}...\n")
+        
+        # List of most popular and critical ports
         common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 993, 995, 1433, 3306, 3389, 5900, 8080]
         
         open_ports = 0
         for port in common_ports:
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(0.5)
+                sock.settimeout(1.0) # Increased timeout to wait for banner
                 result = sock.connect_ex((self.target_ip, port))
                 
                 if result == 0:
-                    service_name = socket.getservbyport(port, "tcp")
-                    self.update_signal.emit(f"✅ OPEN: Port {port} ({service_name})")
+                    # 1. Guess Service Name
+                    try:
+                        service_name = socket.getservbyport(port, "tcp")
+                    except:
+                        service_name = "unknown"
+                    
+                    # 2. BANNER GRABBING (Capture Service Version)
+                    banner = ""
+                    try:
+                        # Send a trigger request for HTTP ports
+                        if port in [80, 8080, 443]:
+                            sock.send(b'HEAD / HTTP/1.0\r\n\r\n')
+                        
+                        # Read the response (SSH, FTP, SMTP speak first)
+                        banner_bytes = sock.recv(1024)
+                        
+                        # Clean data and take the first line
+                        banner = banner_bytes.decode('utf-8', errors='ignore').strip().split('\n')[0]
+                    except:
+                        pass # Leave empty if no banner is received
+                    
+                    # Format Output
+                    if banner:
+                        display_msg = f"✅ OPEN: Port {port} ({service_name}) | 📝 {banner}"
+                    else:
+                        display_msg = f"✅ OPEN: Port {port} ({service_name})"
+                    
+                    self.update_signal.emit(display_msg)
                     open_ports += 1
+                
                 sock.close()
             except Exception as e:
                 pass
@@ -42,7 +72,7 @@ class PortScannerWorker(QThread):
         
         self.finished_signal.emit()
 
-# --- ANA UYGULAMA ---
+# --- MAIN APPLICATION ---
 class SysAdminToolbox(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -54,64 +84,82 @@ class SysAdminToolbox(QMainWindow):
             self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
         ui_path = os.path.join(self.base_dir, "assets", "toolbox.ui")
+        
+        # Database Directory
         self.data_dir = os.path.join(os.getcwd(), "data")
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
         self.db_path = os.path.join(self.data_dir, "fim_baseline.db")
         
-        # UI Yükle
+        # Load UI
         uic.loadUi(ui_path, self)
 
         # ---------------------------------------------------------
-        # BUTON BAĞLANTILARI (_2 EKLİ HALİYLE)
-        # Qt Designer kopyalama yapınca sonlarına _2 eklediği için kodları buna uydurduk.
+        # BUTTON CONNECTIONS
         # ---------------------------------------------------------
         
-        # 1. Dashboard Butonları (Sonlarında _2 var)
-        self.btn_monitor_2.clicked.connect(self.run_monitor)
-        self.btn_disk_2.clicked.connect(self.run_disk)
-        self.btn_fim_init_2.clicked.connect(self.run_fim_init)
-        self.btn_fim_check_2.clicked.connect(self.run_fim_check)
-        self.btn_logs_2.clicked.connect(self.run_logs)
-        self.btn_backup_2.clicked.connect(self.run_backup)
-        self.btn_battery_2.clicked.connect(self.run_battery)
+        # 1. Dashboard Buttons (Check for _2 suffix for Qt Designer compatibility)
+        try:
+            self.btn_monitor_2.clicked.connect(self.run_monitor)
+            self.btn_disk_2.clicked.connect(self.run_disk)
+            self.btn_fim_init_2.clicked.connect(self.run_fim_init)
+            self.btn_fim_check_2.clicked.connect(self.run_fim_check)
+            self.btn_logs_2.clicked.connect(self.run_logs)
+            self.btn_backup_2.clicked.connect(self.run_backup)
+            self.btn_battery_2.clicked.connect(self.run_battery)
+        except AttributeError:
+            # Fallback for non-_2 versions (Old design or manual fix)
+            try:
+                self.btn_monitor.clicked.connect(self.run_monitor)
+                self.btn_disk.clicked.connect(self.run_disk)
+                self.btn_fim_init.clicked.connect(self.run_fim_init)
+                self.btn_fim_check.clicked.connect(self.run_fim_check)
+                self.btn_logs.clicked.connect(self.run_logs)
+                self.btn_backup.clicked.connect(self.run_backup)
+                self.btn_battery.clicked.connect(self.run_battery)
+            except AttributeError:
+                print("⚠️ Error: Dashboard buttons not found.")
 
-        # 2. Service Manager Butonları (Muhtemelen bunlarda da _2 var)
-        # Hata almamak için try-except ile bağlıyoruz, eğer _2 yoksa normalini dener.
+        # 2. Service Manager Buttons
         try:
             self.btn_svc_status_2.clicked.connect(self.service_status)
             self.btn_svc_restart_2.clicked.connect(self.service_restart)
             self.btn_svc_stop_2.clicked.connect(self.service_stop)
         except AttributeError:
-            # Eğer _2 yoksa orijinallerini dene
-            self.btn_svc_status.clicked.connect(self.service_status)
-            self.btn_svc_restart.clicked.connect(self.service_restart)
-            self.btn_svc_stop.clicked.connect(self.service_stop)
+            try:
+                self.btn_svc_status.clicked.connect(self.service_status)
+                self.btn_svc_restart.clicked.connect(self.service_restart)
+                self.btn_svc_stop.clicked.connect(self.service_stop)
+            except AttributeError:
+                pass
 
-        # 3. Network Scanner (Tab 2 - Bunlar yeni olduğu için _2 yoktur)
+        # 3. Network Scanner
         try:
             self.btn_scan.clicked.connect(self.start_port_scan)
+            self.text_scan_result.setReadOnly(True) # Prevent user from typing in result screen
         except AttributeError:
-            print("⚠️ Hata: Network Scanner butonları bulunamadı.")
+            print("⚠️ Error: Network Scanner buttons missing.")
 
-        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.4")
+        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.5")
 
-    # --- KOMUT MOTORU ---
+    # --- COMMAND ENGINE ---
     def run_command(self, command):
-        # Ekran görüntüsünde text_output'un adında _2 yoktu, o yüzden normal bırakıyorum.
-        # Eğer hata verirse burayı self.text_output_2 yapman gerekebilir.
-        self.text_output.clear()
-        self.text_output.append(f"> Executing: {command}\n")
-        self.text_output.repaint()
+        # Dashboard screen (can be text_output or text_output_2)
+        output_widget = getattr(self, "text_output", getattr(self, "text_output_2", None))
         
-        try:
-            result = subprocess.check_output(command, shell=True, text=True, stderr=subprocess.STDOUT, cwd=self.base_dir)
-            self.text_output.append(result)
-        except subprocess.CalledProcessError as e:
-            self.text_output.append(f"❌ Error (Code {e.returncode}):\n{e.output}\n")
-        
-        scrollbar = self.text_output.verticalScrollBar()
-        scrollbar.setValue(scrollbar.maximum())
+        if output_widget:
+            output_widget.clear()
+            output_widget.append(f"> Executing: {command}\n")
+            output_widget.repaint()
+            
+            try:
+                result = subprocess.check_output(command, shell=True, text=True, stderr=subprocess.STDOUT, cwd=self.base_dir)
+                output_widget.append(result)
+            except subprocess.CalledProcessError as e:
+                output_widget.append(f"❌ Error (Code {e.returncode}):\n{e.output}\n")
+            
+            scrollbar = output_widget.verticalScrollBar()
+            scrollbar.setValue(scrollbar.maximum())
 
     # --- NETWORK SCANNER ---
     def start_port_scan(self):
@@ -120,10 +168,9 @@ class SysAdminToolbox(QMainWindow):
             target_ip = "127.0.0.1"
             self.input_ip.setText(target_ip)
         
-        # Sonuç ekranı (Tab 2'deki)
         self.output_area = self.text_scan_result
         self.output_area.clear()
-        self.output_area.append(f"📡 Initializing scan on {target_ip}...\n")
+        self.output_area.append(f"📡 Initializing Deep Scan on {target_ip}...\n")
         
         self.btn_scan.setEnabled(False)
         
@@ -134,7 +181,11 @@ class SysAdminToolbox(QMainWindow):
 
     def update_scan_log(self, message):
         if "OPEN" in message:
-            self.output_area.append(f"<span style='color:#00ff00; font-weight:bold;'>{message}</span>")
+            # Highlight if banner is present
+            if "|" in message:
+                self.output_area.append(f"<span style='color:#00ff00; font-weight:bold;'>{message}</span>")
+            else:
+                self.output_area.append(f"<span style='color:#00cc00;'>{message}</span>")
         else:
             self.output_area.append(f"<span style='color:#aaaaaa;'>{message}</span>")
 
@@ -142,30 +193,25 @@ class SysAdminToolbox(QMainWindow):
         self.btn_scan.setEnabled(True)
         self.output_area.append("\n✅ <b style='color:white;'>Scan Finished.</b>")
 
-    # --- FONKSİYONLAR ---
+    # --- SYSTEM FUNCTIONS ---
     def run_monitor(self):
         self.run_command("echo '--- Kernel ---'; uname -r; echo ''; echo '--- Uptime ---'; uptime -p; echo ''; echo '--- Memory ---'; free -h")
     
     def run_disk(self):
-        self.text_output.append("🔵 Analyzing Disk Usage...")
+        self.text_output.append("🔵 Analyzing Disk Usage...") 
         cmd = r"echo '--- Partition Usage ---'; df -h /; echo ''; echo '--- Large Files in /var/log ---'; find /var/log -type f -size +100M -exec ls -lh {} \; 2>/dev/null || echo 'No large files found.'"
         self.run_command(cmd)
 
     def run_fim_init(self):
-        self.text_output.append(f"🔵 Creating Baseline in data/...")
-        cmd = f"rm -f data/fim_baseline.db; sha256sum *.txt *.sh src/*.py > data/fim_baseline.db 2>/dev/null && echo '✅ Baseline Created!'"
-        self.run_command(cmd)
+        self.run_command(f"rm -f data/fim_baseline.db; sha256sum *.txt *.sh src/*.py > data/fim_baseline.db 2>/dev/null && echo '✅ Baseline Created!'")
 
     def run_fim_check(self):
         if not os.path.exists(self.db_path):
-            self.text_output.append("⚠️ Error: Baseline not found.")
+            self.run_command("echo '⚠️ Error: Baseline not found.'")
             return
-        self.text_output.append("🔵 Checking Integrity...")
-        cmd = "sha256sum -c data/fim_baseline.db"
-        self.run_command(cmd)
+        self.run_command("sha256sum -c data/fim_baseline.db")
 
     def run_logs(self):
-        self.text_output.append("🔵 Security Audit...")
         cmd = """
         echo "--- 1. SSH: Invalid Users ---"
         journalctl -u sshd | grep "Invalid user" | tail -n 5 || echo "Clean."
@@ -178,46 +224,43 @@ class SysAdminToolbox(QMainWindow):
         target_dir = QFileDialog.getExistingDirectory(self, "Select Directory")
         if target_dir:
             name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"
-            self.text_output.append(f"📦 Backing up {target_dir}...")
             self.run_command(f"tar -czf {name} '{target_dir}' && echo '✅ Done: {name}'")
 
     def run_battery(self):
-        self.text_output.append("🔋 Battery Stats...")
         cmd = r"upower -i $(upower -e | grep 'BAT' | head -n 1) | grep -E 'state|to full|percentage|capacity' || true"
         self.run_command(cmd)
 
-    # --- SERVICE MANAGER (GÜNCELLENDİ: input_service_2) ---
+    # --- SERVICE MANAGER ---
     def get_service_name(self):
-        # Ekran görüntüsünde input_ce_2 (input_service_2) görünüyordu
+        # Automatic detection of _2 or normal suffix
         try:
             name = self.input_service_2.text().strip()
         except AttributeError:
-            name = self.input_service.text().strip()
-            
+            try:
+                name = self.input_service.text().strip()
+            except AttributeError:
+                name = ""
+        
         if not name:
-            self.text_output.append("⚠️ Enter service name.")
+            # Trick to print warning to correct screen
+            self.run_command("echo '⚠️ Enter service name.'")
             return None
         return name
 
     def service_status(self):
         svc = self.get_service_name()
         if svc:
-            self.text_output.append(f"🔍 Status: {svc}...")
             self.run_command(f"systemctl status {svc} --no-pager")
 
     def service_restart(self):
         svc = self.get_service_name()
         if svc:
-            self.text_output.append(f"🔄 Restarting {svc}...")
-            cmd = f"pkexec systemctl restart {svc} && echo '✅ Service {svc} restarted!'"
-            self.run_command(cmd)
+            self.run_command(f"pkexec systemctl restart {svc} && echo '✅ Service {svc} restarted!'")
 
     def service_stop(self):
         svc = self.get_service_name()
         if svc:
-            self.text_output.append(f"🛑 Stopping {svc}...")
-            cmd = f"pkexec systemctl stop {svc} && echo '✅ Service {svc} stopped.'"
-            self.run_command(cmd)
+            self.run_command(f"pkexec systemctl stop {svc} && echo '✅ Service {svc} stopped.'")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -1,4 +1,4 @@
-# SysAdmin Toolbox 🛠️ v2.4 (Hybrid Edition)
+# SysAdmin Toolbox 🛠️ v2.5 (Banner Grabbing Edition)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -8,7 +8,7 @@
 
 A powerful system administration tool designed for Linux (Fedora), featuring both a **Classic CLI (Terminal)** and a **Modern GUI (Graphical Interface)**.
 
-> **🎓 Educational Project:** This tool represents my journey from **Bash Scripting** to **Python GUI Development**. It combines system-level commands with a user-friendly interface to perform security audits, monitoring, backups, and **network scanning**.
+> **🎓 Educational Project:** This tool represents my journey from **Bash Scripting** to **Python GUI Development**. It combines system-level commands with a user-friendly interface to perform security audits, monitoring, backups, and **advanced network scanning**.
 
 ## 📸 Screenshots
 
@@ -16,16 +16,17 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
 ![Dashboard Screenshot](screenshots/dashboard.png)
 *Real-time monitoring, service management, and security logs.*
 
-### 2. Network Scanner (Port Analysis)
+### 2. Network Scanner (Banner Grabbing)
 ![Scanner Screenshot](screenshots/scanner.png)
-*Multi-threaded port scanner identifying open ports on target IPs.*
+*Multi-threaded port scanner with **Service Version Detection** (Banner Grabbing).*
 
 ---
 
 ## 🚀 Features
 
-### 🕵️‍♂️ Network & Security (New!)
-* **Port Scanner (Multithreaded):** Scans target IPs for open ports (22, 80, 443, etc.) without freezing the UI.
+### 🕵️‍♂️ Network & Security (v2.5 Update)
+* **Advanced Port Scanner:** Multithreaded scanning preventing UI freeze.
+* **Banner Grabbing (New!):** Detects service versions (e.g., `SSH-2.0-OpenSSH_8.7`) running on open ports.
 * **Log Analyzer (IDS):** Detects SSH brute-force attacks and Sudo violations.
 * **File Integrity Monitor (FIM):** Automatically creates baselines and detects unauthorized file changes.
 
@@ -46,6 +47,9 @@ sysadmin-toolbox/
 │   └── main_gui.py
 ├── assets/         # UI Resources
 │   └── toolbox.ui
+├── screenshots/    # Project Images
+│   ├── dashboard.png
+│   └── scanner.png
 ├── data/           # Databases & Logs (Generated files)
 │   └── fim_baseline.db
 ├── install.sh      # Desktop Installer
@@ -140,10 +144,10 @@ chmod +x uninstall.sh
 
 By building this tool, I mastered:
 * **PyQt6 & Qt Designer:** Creating complex, tabbed user interfaces.
-* **Multithreading (`QThread`):** Running network scans in the background without freezing the UI.
+* **Socket Programming:** Implementing raw socket connections for network analysis.
+* **Multithreading (`QThread`):** Running background tasks without freezing the UI.
 * **Hybrid Architecture:** Connecting Python GUI with Bash system commands.
 * **Software Packaging:** Building portable binaries with **PyInstaller**.
-* **Cyber Security:** Implementing Port Scanning and Intrusion Detection logic.
 
 ## 📄 License
 
