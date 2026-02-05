@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # ==========================================
-# SysAdmin Toolbox v1.1
+# SysAdmin Toolbox v2.1 (Hybrid Edition)
 # Developer: Futhark1393
-# Description: System Monitoring, Backups, and File Integrity (FIM)
+# Description: System Monitoring, Backups, FIM, and Service Management
 # License: MIT
 # ==========================================
 
@@ -27,7 +27,7 @@ pause() {
 header() {
     clear
     echo -e "${CYAN}======================================${NC}"
-    echo -e "${CYAN}    SYSADMIN TOOLBOX - v1.1           ${NC}"
+    echo -e "${CYAN}    SYSADMIN TOOLBOX - v2.1           ${NC}"
     echo -e "${CYAN}    User: $USER | Host: $HOSTNAME     ${NC}"
     echo -e "${CYAN}======================================${NC}"
 }
@@ -50,10 +50,10 @@ disk_usage() {
     echo "---------------------------------"
     df -h / | awk 'NR==2 {print "Total: " $2, "| Used: " $3, "| Free: " $4, "| Use%: " $5}'
     
-    # Advanced: Find files larger than 100MB
     echo ""
     echo -e "${BLUE}Scanning for large files (>100MB) in /var/log...${NC}"
-    find /var/log -type f -size +100M -exec ls -lh {} \; 2>/dev/null
+    # Hata mesajlarını (/dev/null) gizledik
+    find /var/log -type f -size +100M -exec ls -lh {} \; 2>/dev/null || echo "No large files found."
     
     echo ""
     pause
@@ -86,7 +86,8 @@ battery_check() {
     echo -e "${YELLOW}[*] Battery Health Status${NC}"
     echo "---------------------------------"
     if command -v upower &> /dev/null; then
-        BATTERY_PATH=$(upower -e | grep 'BAT')
+        # Python'daki düzeltme: Sadece ilk BAT sonucunu al (head -n 1)
+        BATTERY_PATH=$(upower -e | grep 'BAT' | head -n 1)
         if [ -n "$BATTERY_PATH" ]; then
             upower -i "$BATTERY_PATH" | grep -E "state|to\ full|percentage|capacity"
         else
@@ -98,7 +99,6 @@ battery_check() {
     pause
 }
 
-# --- NEW: Advanced Log Analyzer Module ---
 log_analyze() {
     header
     echo -e "${YELLOW}[*] Security Intrusion & Log Analysis${NC}"
@@ -106,9 +106,7 @@ log_analyze() {
     
     if command -v journalctl &> /dev/null; then
         
-        # --- 1. SSH: Invalid User Attempts (Brute Force on Usernames) ---
         echo -e "${CYAN}--- SSH: Invalid Usernames (Top 5) ---${NC}"
-        # "Invalid user" geçen satırları bul, IP'leri ayıkla
         if journalctl -u sshd | grep -q "Invalid user"; then
             journalctl -u sshd | grep "Invalid user" | awk '{print $(NF-2)}' | sort | uniq -c | sort -nr | head -n 5
         else
@@ -116,42 +114,34 @@ log_analyze() {
         fi
         echo ""
 
-        # --- 2. SSH: Failed Passwords (Brute Force on Valid Users) ---
         echo -e "${RED}--- SSH: Failed Password Attempts (Last 5) ---${NC}"
-        # Tarih, Saat, Kullanıcı ve IP bilgisini düzenli göster
         if journalctl -u sshd | grep -q "Failed password"; then
-            # Format: Month Day Time ... User ... IP
             journalctl -u sshd | grep "Failed password" | tail -n 5 | awk '{print $1, $2, $3, "-> User:", $(NF-5), "from IP:", $(NF-3)}'
         else
             echo -e "${GREEN}No failed password attempts detected.${NC}"
         fi
         echo ""
 
-        # --- 3. SUDO: Unauthorized Root Access Attempts ---
         echo -e "${YELLOW}--- SUDO: Internal Security Incidents ---${NC}"
-        # "COMMAND" çalıştırırken hata alanları bul
         if journalctl _COMM=sudo | grep -q "COMMAND"; then
-             journalctl _COMM=sudo | grep "NOT in sudoers" | tail -n 5
-             journalctl _COMM=sudo | grep "incorrect password" | tail -n 5
+             journalctl _COMM=sudo | grep -E "NOT in sudoers|incorrect password" | tail -n 5
         else
              echo -e "${GREEN}No sudo violations found.${NC}"
         fi
 
     else
-        echo -e "${RED}Error: journalctl not found. Cannot analyze logs.${NC}"
+        echo -e "${RED}Error: journalctl not found.${NC}"
     fi
-    
     echo ""
     pause
 }
 
-# --- NEW: File Integrity Monitor Module ---
 fim_ops() {
     while true; do
         header
         echo -e "${YELLOW}[*] File Integrity Monitor (FIM)${NC}"
         echo "---------------------------------"
-        echo "1. Initialize Baseline (Learn Hashes)"
+        echo "1. Initialize Baseline (Auto-scan .txt, .sh, .py)"
         echo "2. Check Integrity (Scan for Changes)"
         echo "3. Back to Main Menu"
         echo ""
@@ -160,20 +150,22 @@ fim_ops() {
         case $fim_choice in
             1)
                 echo ""
-                read -p "Enter files to monitor (e.g. *.txt or /etc/passwd): " TARGET_FILES
-                echo -e "${BLUE}Calculating hashes for: $TARGET_FILES ...${NC}"
+                # Python'daki gibi otomatikleştirilmiş hali
+                read -p "Enter directory to scan (Press Enter for current dir): " SCAN_DIR
+                if [ -z "$SCAN_DIR" ]; then SCAN_DIR="."; fi
                 
-                # Overwrite old baseline
+                echo -e "${BLUE}Creating baseline for .txt, .sh, .py in $SCAN_DIR ...${NC}"
+                
                 if [ -f "$BASELINE_FILE" ]; then rm "$BASELINE_FILE"; fi
                 
-                # Loop through files and hash them
-                for f in $TARGET_FILES; do
-                    if [ -f "$f" ]; then
-                        sha256sum "$f" >> "$BASELINE_FILE"
-                        echo "  [+] Added: $f"
-                    fi
-                done
-                echo -e "${GREEN}[DONE] Baseline saved to $BASELINE_FILE${NC}"
+                # Sadece ilgili uzantıları bul ve hashle
+                find "$SCAN_DIR" -maxdepth 1 -type f \( -name "*.txt" -o -name "*.sh" -o -name "*.py" \) -exec sha256sum {} + > "$BASELINE_FILE" 2>/dev/null
+                
+                if [ -s "$BASELINE_FILE" ]; then
+                    echo -e "${GREEN}[DONE] Baseline saved to $BASELINE_FILE${NC}"
+                else
+                    echo -e "${RED}[ERROR] No matching files found in $SCAN_DIR${NC}"
+                fi
                 read -p "Press Enter..."
                 ;;
             2)
@@ -182,18 +174,7 @@ fim_ops() {
                     echo -e "${RED}[ERROR] No baseline found! Run Init first.${NC}"
                 else
                     echo -e "${BLUE}Checking integrity...${NC}"
-                    while read -r saved_hash filename; do
-                        if [ -f "$filename" ]; then
-                            current_hash=$(sha256sum "$filename" | awk '{print $1}')
-                            if [ "$current_hash" == "$saved_hash" ]; then
-                                echo -e "${GREEN}[OK] $filename${NC}"
-                            else
-                                echo -e "${RED}[ALERT] MODIFIED: $filename${NC}"
-                            fi
-                        else
-                            echo -e "${RED}[MISSING] DELETED: $filename${NC}"
-                        fi
-                    done < "$BASELINE_FILE"
+                    sha256sum -c "$BASELINE_FILE"
                 fi
                 read -p "Press Enter..."
                 ;;
@@ -201,6 +182,48 @@ fim_ops() {
             *) echo "Invalid option." ;;
         esac
     done
+}
+
+# --- NEW: Service Manager Module ---
+service_manager() {
+    header
+    echo -e "${YELLOW}[*] Service Manager (Systemd)${NC}"
+    echo "---------------------------------"
+    read -p "Enter Service Name (e.g. sshd, cron): " SVC_NAME
+    
+    if [ -z "$SVC_NAME" ]; then
+        echo -e "${RED}No service name entered.${NC}"
+        pause
+        return
+    fi
+
+    echo ""
+    echo "1. Check Status"
+    echo "2. Restart Service (Sudo)"
+    echo "3. Stop Service (Sudo)"
+    echo "4. Cancel"
+    echo ""
+    read -p "Select Action: " svc_action
+
+    case $svc_action in
+        1)
+            echo -e "${BLUE}Checking status of $SVC_NAME...${NC}"
+            systemctl status "$SVC_NAME" --no-pager
+            ;;
+        2)
+            echo -e "${BLUE}Restarting $SVC_NAME...${NC}"
+            sudo systemctl restart "$SVC_NAME"
+            if [ $? -eq 0 ]; then echo -e "${GREEN}Service restarted successfully.${NC}"; fi
+            ;;
+        3)
+            echo -e "${BLUE}Stopping $SVC_NAME...${NC}"
+            sudo systemctl stop "$SVC_NAME"
+            if [ $? -eq 0 ]; then echo -e "${GREEN}Service stopped.${NC}"; fi
+            ;;
+        *) echo "Cancelled." ;;
+    esac
+    echo ""
+    pause
 }
 
 # --- Main Menu Loop ---
@@ -211,10 +234,11 @@ while true; do
     echo "3. Backup Tool"
     echo "4. Battery Health"
     echo "5. File Integrity Monitor (FIM)"
-    echo "6. Log Analyzer (Intruder Detect) [NEW]"
-    echo "7. Exit"
+    echo "6. Log Analyzer (Intruder Detect)"
+    echo "7. Service Manager [NEW]"
+    echo "8. Exit"
     echo ""
-    read -p "Select an option [1-7]: " choice
+    read -p "Select an option [1-8]: " choice
 
     case $choice in
         1) sys_monitor ;;
@@ -222,9 +246,9 @@ while true; do
         3) backup_ops ;;
         4) battery_check ;;
         5) fim_ops ;;
-        6) log_analyze ;;  # <--- YENİ EKLENEN
-        7) echo -e "${GREEN}Exiting. Have a secure day, Futhark!${NC}"; exit 0 ;;
+        6) log_analyze ;;
+        7) service_manager ;;  # <--- YENİ EKLENEN
+        8) echo -e "${GREEN}Exiting. Have a secure day, Futhark!${NC}"; exit 0 ;;
         *) echo -e "${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
 done
-

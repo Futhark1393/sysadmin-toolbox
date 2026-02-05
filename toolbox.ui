@@ -30,13 +30,13 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>186</width>
-      <height>491</height>
+      <x>10</x>
+      <y>10</y>
+      <width>199</width>
+      <height>351</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -86,6 +86,46 @@
       <widget class="QPushButton" name="btn_battery">
        <property name="text">
         <string>🔋Battery Health</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>360</y>
+      <width>199</width>
+      <height>181</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="input_service">
+       <property name="placeholderText">
+        <string>Enter service name (e.g. sshd)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_svc_status">
+       <property name="text">
+        <string>🔍 Check Status</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_svc_restart">
+       <property name="text">
+        <string>🔄 Restart Service (Sudo)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_svc_stop">
+       <property name="text">
+        <string>🛑 Stop Service (Sudo)</string>
        </property>
       </widget>
      </item>
