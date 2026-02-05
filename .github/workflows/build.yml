@@ -1,0 +1,37 @@
+name: Build Linux Binary 🐧
+
+# Trigger the workflow on push or pull request events but only for the "main" branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner provided by GitHub
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 🔨 Build with PyInstaller
+      run: |
+        # Build the standalone executable (onefile) using the GUI script
+        pyinstaller --name "SysAdminToolbox" --onefile --windowed --add-data "assets/toolbox.ui:assets" src/main_gui.py
+
+    - name: 📤 Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SysAdminToolbox-Linux
+        path: dist/SysAdminToolbox
