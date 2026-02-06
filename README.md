@@ -1,4 +1,4 @@
-# SysAdmin Toolbox 🛠️ v2.6.1 (Stable)
+# SysAdmin Toolbox 🛠️ v2.6.2 (Stable)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -22,14 +22,17 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
 
 ---
 
-## 🚀 What's New in v2.6.1?
+## 🚀 What's New in v2.6.2?
 
-### 🔧 Bug Fixes (Hotfix)
-* **FIM Logic Fixed:** Resolved the "Error Code 1" issue in the File Integrity Monitor. It now uses the `find` command to gracefully handle missing file extensions during baseline creation.
+### ⚡ UX Improvements (New)
+* **Enter Key Support:** You can now press `Enter` in the IP address field to immediately start the scan (no need to click the button manually).
+
+### 🔧 Recent Fixes (v2.6.1)
+* **FIM Logic Fixed:** Resolved the "Error Code 1" issue in the File Integrity Monitor by using `find` for robust file detection.
 
 ### 📄 Professional PDF Reporting
 * **Export Scan Results:** Right-click on the scan results to save them as a professional PDF report.
-* **Auto-Sanitization:** Automatically converts emojis (e.g., ✅, 🚀) into text-safe format (e.g., `[+]`, `>>>`) to ensure compatibility with all PDF readers.
+* **Auto-Sanitization:** Automatically converts emojis (e.g., ✅, 🚀) into text-safe format for compatibility.
 
 ### 🕵️‍♂️ Network & Security
 * **Advanced Port Scanner:** Multithreaded scanning preventing UI freeze.
@@ -72,7 +75,7 @@ Designed for **Fedora Linux**, but compatible with most systemd-based distributi
 
 Clone the repository:
 ```bash
-git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
+git clone https://github.com/Futhark1393/sysadmin-toolbox.git
 cd sysadmin-toolbox
 ```
 
