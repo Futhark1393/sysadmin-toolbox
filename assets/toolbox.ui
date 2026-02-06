@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
@@ -24,7 +27,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -34,7 +37,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>10</y>
+        <y>40</y>
         <width>199</width>
         <height>321</height>
        </rect>
@@ -111,7 +114,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>340</y>
+        <y>350</y>
         <width>199</width>
         <height>181</height>
        </rect>
@@ -147,6 +150,19 @@
        </item>
       </layout>
      </widget>
+     <widget class="QPushButton" name="btn_back_dashboard">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>10</y>
+        <width>191</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>⬅ Home</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_7">
      <attribute name="title">
@@ -169,7 +185,7 @@
       <property name="geometry">
        <rect>
         <x>90</x>
-        <y>20</y>
+        <y>30</y>
         <width>821</width>
         <height>27</height>
        </rect>
@@ -187,6 +203,19 @@
         <string>🚀 START SCAN</string>
        </property>
       </widget>
+     </widget>
+     <widget class="QPushButton" name="btn_back_scanner">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>91</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>⬅ Home</string>
+      </property>
      </widget>
     </widget>
    </widget>

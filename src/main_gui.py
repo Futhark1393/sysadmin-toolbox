@@ -92,6 +92,10 @@ class SysAdminToolbox(QMainWindow):
         
         uic.loadUi(ui_path, self)
 
+        # ---------------------------------------------------------
+        # BUTTON CONNECTIONS
+        # ---------------------------------------------------------
+
         # 1. Dashboard Buttons
         try:
             self.btn_monitor_2.clicked.connect(self.run_monitor)
@@ -126,17 +130,24 @@ class SysAdminToolbox(QMainWindow):
             except AttributeError:
                 pass
 
-        # 3. Network Scanner
+        # 3. Network Scanner & PDF & ENTER KEY SUPPORT
         try:
             self.btn_scan.clicked.connect(self.start_port_scan)
+            
+            # --- ENTER KEY SUPPORT ---
+            # Kullanıcı IP kutusunda Enter'a basarsa da tarama başlasın
+            self.input_ip.returnPressed.connect(self.start_port_scan)
+            # -------------------------
+
             self.text_scan_result.setReadOnly(True)
             self.text_scan_result.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
             self.text_scan_result.customContextMenuRequested.connect(self.show_context_menu)
         except AttributeError:
             print("⚠️ Error: Network Scanner buttons missing.")
 
-        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.6.1 (Fix: FIM)")
+        self.setWindowTitle("Futhark's SysAdmin Toolbox v2.6.2")
 
+    # --- FUNCTIONS ---
     def show_context_menu(self, pos: QPoint):
         menu = QMenu(self)
         export_action = menu.addAction("📄 Export to PDF")
@@ -147,26 +158,17 @@ class SysAdminToolbox(QMainWindow):
     def export_pdf(self):
         content = self.text_scan_result.toPlainText()
         target_ip = self.input_ip.text()
-        
         if not content.strip():
             self.run_command("echo '⚠️ No scan data to export!'")
             return
-
         file_name, _ = QFileDialog.getSaveFileName(self, "Save Report", f"ScanReport_{target_ip}.pdf", "PDF Files (*.pdf)")
-        
         if file_name:
             try:
-                replacements = {
-                    "✅": "[+]", "❌": "[-]", "🚀": ">>>", "📡": "[*]", 
-                    "📝": "->", "🚫": "[!]", "🏁": "[FINISH]", "🔵": "[*]", "⚠️": "[WARN]",
-                    "İ": "I", "ı": "i", "ğ": "g", "Ğ": "G", "ş": "s", "Ş": "S", 
-                    "ç": "c", "Ç": "C", "ö": "o", "Ö": "O", "ü": "u", "Ü": "U"
-                }
+                replacements = {"✅": "[+]", "❌": "[-]", "🚀": ">>>", "📡": "[*]", "📝": "->", "🚫": "[!]", "🏁": "[FINISH]", "🔵": "[*]", "⚠️": "[WARN]", "İ": "I", "ı": "i", "ğ": "g", "Ğ": "G", "ş": "s", "Ş": "S", "ç": "c", "Ç": "C", "ö": "o", "Ö": "O", "ü": "u", "Ü": "U"}
                 safe_content = content
                 for original, replacement in replacements.items():
                     safe_content = safe_content.replace(original, replacement)
                 safe_content = safe_content.encode('latin-1', 'ignore').decode('latin-1')
-
                 pdf = PDFReport()
                 pdf.add_page()
                 pdf.set_font("Arial", size=12)
@@ -223,74 +225,47 @@ class SysAdminToolbox(QMainWindow):
 
     def run_monitor(self):
         self.run_command("echo '--- Kernel ---'; uname -r; echo ''; echo '--- Uptime ---'; uptime -p; echo ''; echo '--- Memory ---'; free -h")
-    
     def run_disk(self):
         self.text_output.append("🔵 Analyzing Disk Usage...") 
         cmd = r"echo '--- Partition Usage ---'; df -h /; echo ''; echo '--- Large Files in /var/log ---'; find /var/log -type f -size +100M -exec ls -lh {} \; 2>/dev/null || echo 'No large files found.'"
         self.run_command(cmd)
-
     def run_fim_init(self):
-        cmd = (
-            "rm -f data/fim_baseline.db; "
-            "find . -maxdepth 2 -type f \\( -name '*.txt' -o -name '*.sh' -o -name '*.py' \\) "
-            "-not -path '*/.*' "
-            "-exec sha256sum {} + > data/fim_baseline.db 2>/dev/null && "
-            "echo '✅ Baseline Created!'"
-        )
+        cmd = ("rm -f data/fim_baseline.db; " "find . -maxdepth 2 -type f \\( -name '*.txt' -o -name '*.sh' -o -name '*.py' \\) " "-not -path '*/.*' " "-exec sha256sum {} + > data/fim_baseline.db 2>/dev/null && " "echo '✅ Baseline Created!'")
         self.run_command(cmd)
-
     def run_fim_check(self):
         if not os.path.exists(self.db_path):
             self.run_command("echo '⚠️ Error: Baseline not found.'")
             return
         self.run_command("sha256sum -c data/fim_baseline.db")
-
     def run_logs(self):
-        cmd = """
-        echo "--- 1. SSH: Invalid Users ---"
-        journalctl -u sshd | grep "Invalid user" | tail -n 5 || echo "Clean."
-        echo "\n--- 2. SUDO: Violations ---"
-        journalctl _COMM=sudo | grep "NOT in sudoers" | tail -n 5 || echo "Clean."
-        """
+        cmd = """echo "--- 1. SSH: Invalid Users ---"; journalctl -u sshd | grep "Invalid user" | tail -n 5 || echo "Clean."; echo "\n--- 2. SUDO: Violations ---"; journalctl _COMM=sudo | grep "NOT in sudoers" | tail -n 5 || echo "Clean." """
         self.run_command(cmd)
-
     def run_backup(self):
         target_dir = QFileDialog.getExistingDirectory(self, "Select Directory")
         if target_dir:
             name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"
             self.run_command(f"tar -czf {name} '{target_dir}' && echo '✅ Done: {name}'")
-
     def run_battery(self):
         cmd = r"upower -i $(upower -e | grep 'BAT' | head -n 1) | grep -E 'state|to full|percentage|capacity' || true"
         self.run_command(cmd)
-
     def get_service_name(self):
-        try:
-            name = self.input_service_2.text().strip()
+        try: name = self.input_service_2.text().strip()
         except AttributeError:
-            try:
-                name = self.input_service.text().strip()
-            except AttributeError:
-                name = ""
+            try: name = self.input_service.text().strip()
+            except AttributeError: name = ""
         if not name:
             self.run_command("echo '⚠️ Enter service name.'")
             return None
         return name
-
     def service_status(self):
         svc = self.get_service_name()
-        if svc:
-            self.run_command(f"systemctl status {svc} --no-pager")
-
+        if svc: self.run_command(f"systemctl status {svc} --no-pager")
     def service_restart(self):
         svc = self.get_service_name()
-        if svc:
-            self.run_command(f"pkexec systemctl restart {svc} && echo '✅ Service {svc} restarted!'")
-
+        if svc: self.run_command(f"pkexec systemctl restart {svc} && echo '✅ Service {svc} restarted!'")
     def service_stop(self):
         svc = self.get_service_name()
-        if svc:
-            self.run_command(f"pkexec systemctl stop {svc} && echo '✅ Service {svc} stopped.'")
+        if svc: self.run_command(f"pkexec systemctl stop {svc} && echo '✅ Service {svc} stopped.'")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
