@@ -180,30 +180,22 @@ class SysAdminToolbox(QMainWindow):
             QMessageBox.warning(self, "Error", "Please enter a Target IP or Path!")
             return
 
-        # Cron komutunu oluştur (Headless mod çağrısı)
-        # Örn: 30 14 * * * /usr/bin/python3 /path/to/main.py --scan 192.168.1.1 # SysAdminToolbox
-        
         py_exec = self.get_python_path()
         script = self.get_script_path()
         
+        # DÜZELTME: % işaretleri çift kaçış karakteri (\\) ile düzeltildi.
         if "Scan" in task_type:
             cmd = f"{minute} {hour} * * * {py_exec} {script} --scan {target} # SysAdminToolbox-Scan"
         elif "Backup" in task_type:
-            # Backup için basit bir tar komutu
-            backup_name = f"/tmp/backup_$(date +\%Y\%m\%d).tar.gz"
+            backup_name = f"/tmp/backup_$(date +\\%Y\\%m\\%d).tar.gz"
             cmd = f"{minute} {hour} * * * tar -czf {backup_name} {target} # SysAdminToolbox-Backup"
         else:
             return
 
-        # Crontab'a ekle
         try:
-            # Mevcut cronları al
             current_cron = subprocess.run("crontab -l", shell=True, capture_output=True, text=True).stdout
-            
-            # Yeni satırı ekle
             new_cron = current_cron + "\n" + cmd + "\n"
             
-            # Yaz (echo "..." | crontab -)
             process = subprocess.Popen(["crontab", "-"], stdin=subprocess.PIPE, text=True)
             process.communicate(new_cron)
             
@@ -220,7 +212,6 @@ class SysAdminToolbox(QMainWindow):
         
         try:
             current_cron = subprocess.check_output("crontab -l", shell=True, text=True)
-            # Seçilen satır hariç diğerlerini tut
             new_cron = "\n".join([line for line in current_cron.splitlines() if line.strip() != task_line.strip()])
             new_cron += "\n"
             
@@ -303,6 +294,8 @@ class SysAdminToolbox(QMainWindow):
         target_dir = QFileDialog.getExistingDirectory(self, "Select Directory")
         if target_dir: name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"; self.run_command(f"tar -czf {name} '{target_dir}' && echo '✅ Done: {name}'")
     def run_battery(self): cmd = r"upower -i $(upower -e | grep 'BAT' | head -n 1) | grep -E 'state|to full|percentage|capacity' || true"; self.run_command(cmd)
+    
+    # --- FIXED SERVICE FUNCTIONS ---
     def get_service_name(self):
         try: name = self.input_service_2.text().strip()
         except AttributeError:
@@ -310,24 +303,32 @@ class SysAdminToolbox(QMainWindow):
             except AttributeError: name = ""
         if not name: self.run_command("echo '⚠️ Enter service name.'"); return None
         return name
-    def service_status(self): svc = self.get_service_name(); 
-    if svc: self.run_command(f"systemctl status {svc} --no-pager")
-    def service_restart(self): svc = self.get_service_name(); 
-    if svc: self.run_command(f"pkexec systemctl restart {svc} && echo '✅ Service {svc} restarted!'")
-    def service_stop(self): svc = self.get_service_name(); 
-    if svc: self.run_command(f"pkexec systemctl stop {svc} && echo '✅ Service {svc} stopped.'")
+
+    def service_status(self):
+        svc = self.get_service_name()
+        if svc:
+            self.run_command(f"systemctl status {svc} --no-pager")
+
+    def service_restart(self):
+        svc = self.get_service_name()
+        if svc:
+            self.run_command(f"pkexec systemctl restart {svc} && echo '✅ Service {svc} restarted!'")
+
+    def service_stop(self):
+        svc = self.get_service_name()
+        if svc:
+            self.run_command(f"pkexec systemctl stop {svc} && echo '✅ Service {svc} stopped.'")
 
 # --- ENTRY POINT (CLI + GUI) ---
 if __name__ == "__main__":
-    # Eğer komut satırından "--scan" argümanı gelirse GUI'yi başlatma!
     if len(sys.argv) > 1:
         if sys.argv[1] == "--scan" and len(sys.argv) > 2:
             target = sys.argv[2]
             headless_scan(target)
-            sys.exit(0) # Programı burada bitir
+            sys.exit(0)
     
-    # Argüman yoksa GUI'yi başlat
     app = QApplication(sys.argv)
     window = SysAdminToolbox()
     window.show()
     sys.exit(app.exec())
+

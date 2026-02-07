@@ -52,6 +52,9 @@ sysadmin-toolbox/
 ├── assets/         # UI Resources
 │   └── toolbox.ui
 ├── screenshots/    # Project Images
+│   ├── dashboard.png
+│   ├── scanner.png
+│   └── scheduler.png
 ├── data/           # Databases & Logs
 │   └── fim_baseline.db
 ├── install.sh      # Desktop Installer
