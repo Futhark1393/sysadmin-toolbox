@@ -27,7 +27,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -190,6 +190,71 @@
         <string>🚀 START SCAN</string>
        </property>
       </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Task Scheduler</string>
+     </attribute>
+     <widget class="QListWidget" name="list_tasks">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>30</y>
+        <width>671</width>
+        <height>491</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>-40</y>
+        <width>251</width>
+        <height>631</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QTimeEdit" name="time_scheduler"/>
+       </item>
+       <item>
+        <widget class="QComboBox" name="combo_task_type">
+         <item>
+          <property name="text">
+           <string>Network Scan</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>System Backup</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="input_task_target">
+         <property name="placeholderText">
+          <string>Target IP or Backup Path</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_add_task">
+         <property name="text">
+          <string>➕ Schedule Task</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_delete_task">
+         <property name="text">
+          <string>🗑️ Remove Selected</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </widget>

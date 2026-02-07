@@ -1,14 +1,14 @@
-# SysAdmin Toolbox 🛠️ v2.6.2 (Stable)
+# SysAdmin Toolbox 🛠️ v3.0 (Automation Edition)
 
 ![Bash](https://img.shields.io/badge/Shell-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Qt](https://img.shields.io/badge/GUI-PyQt6-41CD52?style=for-the-badge&logo=qt&logoColor=white)
-![Build](https://img.shields.io/badge/Build-PyInstaller-blue?style=for-the-badge&logo=python&logoColor=white)
+![Automation](https://img.shields.io/badge/Automation-Cron-red?style=for-the-badge&logo=linux&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-A powerful system administration tool designed for Linux (Fedora), featuring both a **Classic CLI (Terminal)** and a **Modern GUI (Graphical Interface)**.
+A powerful system administration and security suite designed for **Linux (Fedora)**. This tool bridges the gap between manual scripting and modern GUI tools, now featuring **Task Automation** and **Headless Operations**.
 
-> **🎓 Educational Project:** This tool represents my journey from **Bash Scripting** to **Python GUI Development**. It combines system-level commands with a user-friendly interface to perform security audits, monitoring, backups, and **advanced network scanning**.
+> **🎓 Educational Project:** This tool represents my journey from Bash Scripting to Python GUI Development and System Automation. It combines system-level commands, network auditing, and `cron` management into a single interface.
 
 ## 📸 Screenshots
 
@@ -16,28 +16,32 @@ A powerful system administration tool designed for Linux (Fedora), featuring bot
 ![Dashboard Screenshot](screenshots/dashboard.png)
 *Real-time monitoring, service management, and security logs.*
 
-### 2. Network Scanner (Banner Grabbing & Reporting)
+### 2. Network Scanner (Banner Grabbing & PDF Export)
 ![Scanner Screenshot](screenshots/scanner.png)
-*Multi-threaded port scanner with **PDF Export** capabilities.*
+*Multi-threaded port scanner with professional PDF reporting.*
+
+### 3. Task Scheduler (New!)
+![Scheduler Screenshot](screenshots/scheduler.png)
+*Automate scans and backups using the native Linux Cron system.*
 
 ---
 
-## 🚀 What's New in v2.6.2?
+## 🚀 What's New in v3.0?
 
-### ⚡ UX Improvements (New)
-* **Enter Key Support:** You can now press `Enter` in the IP address field to immediately start the scan (no need to click the button manually).
+### 🤖 Automation & Scheduling
+* **Task Scheduler UI:** Easily schedule recurring tasks (Security Scans or Backups) without writing complex Cron syntax manually.
+* **Cron Management:** View and delete tasks created by SysAdmin Toolbox directly from the GUI.
 
-### 🔧 Recent Fixes (v2.6.1)
-* **FIM Logic Fixed:** Resolved the "Error Code 1" issue in the File Integrity Monitor by using `find` for robust file detection.
+### 👻 Headless Mode (CLI Support)
+* **Background Scanning:** The tool can now run without the GUI using command-line arguments.
+    * Example: `python3 src/main_gui.py --scan 192.168.1.10`
+* **Auto-Reporting:** When triggered by the Scheduler, scan results are automatically saved as timestamped text files (`scan_report_IP_DATE.txt`).
 
-### 📄 Professional PDF Reporting
-* **Export Scan Results:** Right-click on the scan results to save them as a professional PDF report.
-* **Auto-Sanitization:** Automatically converts emojis (e.g., ✅, 🚀) into text-safe format for compatibility.
-
-### 🕵️‍♂️ Network & Security
-* **Advanced Port Scanner:** Multithreaded scanning preventing UI freeze.
-* **Banner Grabbing:** Detects service versions (e.g., `SSH-2.0-OpenSSH_8.7`) running on open ports.
-* **Log Analyzer (IDS):** Detects SSH brute-force attacks and Sudo violations.
+### ⚡ Previous Features (v2.6.x)
+* **UX Improvements:** Enter key support for quick scanning.
+* **PDF Reporting:** Export scan results to PDF.
+* **FIM (File Integrity Monitor):** Detect unauthorized file changes.
+* **Log Analyzer (IDS):** Detect SSH brute-force and Sudo violations.
 
 ## 📂 Project Structure
 
@@ -48,11 +52,11 @@ sysadmin-toolbox/
 ├── assets/         # UI Resources
 │   └── toolbox.ui
 ├── screenshots/    # Project Images
-├── data/           # Databases & Logs (Generated files)
+├── data/           # Databases & Logs
 │   └── fim_baseline.db
 ├── install.sh      # Desktop Installer
 ├── uninstall.sh    # Uninstaller
-└── toolbox.sh      # CLI Version (Bash Script)
+└── toolbox.sh      # Legacy CLI Version
 ```
 
 ## 📋 Requirements
@@ -60,93 +64,65 @@ sysadmin-toolbox/
 Designed for **Fedora Linux**, but compatible with most systemd-based distributions.
 
 ### Core Requirements
-* `bash` (4.0+)
-* `journalctl` & `systemctl`
-* `sha256sum`
-* `upower`
-
-### GUI Requirements
 * `python3`
 * `PyQt6` (Fedora: `sudo dnf install python3-pyqt6`)
 * `fpdf2` (For PDF Generation: `pip install fpdf2`)
-* `polkit` (For `pkexec` password prompts in GUI)
+* `cronie` (For Scheduling: Ensure `crond` service is running)
+* `polkit` (For `pkexec` password prompts)
 
 ## 📦 Installation & Usage
 
 Clone the repository:
 ```bash
-git clone https://github.com/Futhark1393/sysadmin-toolbox.git
+git clone [https://github.com/Futhark1393/sysadmin-toolbox.git](https://github.com/Futhark1393/sysadmin-toolbox.git)
 cd sysadmin-toolbox
 ```
 
 ---
 
-### 🎨 Option 1: GUI Mode (Recommended)
-Add the application to your system menu for easy access.
-
-**Step 1: Install Python Dependencies**
+### 🎨 GUI Mode (Recommended)
+**Step 1: Install Dependencies**
 ```bash
 sudo dnf install python3-pyqt6
 pip install fpdf2
 ```
 
-**Step 2: Run the Installer**
-This script creates a dynamic desktop shortcut.
+**Step 2: Install & Run**
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
-*🎉 Now simply search for **"SysAdmin Toolbox"** in your Application Menu!*
+*🎉 Search for **"SysAdmin Toolbox"** in your App Menu!*
 
 ---
 
-### 🎒 Option 2: Portable Binary (Standalone)
-Build a single executable file that runs without Python installed.
+### 🤖 Automation Mode (How it works)
+You can schedule tasks via the **"Task Scheduler"** tab in the GUI.
 
-**Step 1: Install PyInstaller**
+**To run a scan manually in Headless Mode (No GUI):**
+```bash
+# This command will scan the IP and save a report to the current directory
+python3 src/main_gui.py --scan 192.168.1.1
+```
+*Useful for servers or remote execution via SSH.*
+
+---
+
+### 🎒 Portable Binary
+Build a standalone executable (no Python required):
+
 ```bash
 pip install pyinstaller fpdf2
-```
-
-**Step 2: Build the Project**
-```bash
 pyinstaller --name "SysAdminToolbox" --onefile --windowed --add-data "assets/toolbox.ui:assets" src/main_gui.py
-```
-
-**Step 3: Run**
-The executable is generated in the `dist/` folder.
-```bash
 ./dist/SysAdminToolbox
-```
-
----
-
-### 🖥️ Option 3: CLI Mode (Terminal)
-Best for headless servers or quick SSH access.
-
-**Run:**
-```bash
-chmod +x toolbox.sh
-./toolbox.sh
-```
-
-## 🗑️ Uninstallation
-
-To remove the desktop shortcut and clean up generated data:
-
-```bash
-chmod +x uninstall.sh
-./uninstall.sh
 ```
 
 ## ⚠️ Legal Disclaimer
 
 **For Educational Purposes Only.**
-This tool is designed for system administrators and security enthusiasts to audit their *own* networks and systems.
-
-* **Do not use this tool on networks or systems you do not own or do not have explicit permission to test.**
-* The author (@Futhark1393) is not responsible for any damage, data loss, or legal consequences caused by the misuse of this tool.
-* By downloading and using this software, you agree to use it responsibly and in accordance with all applicable local and international laws.
+This tool is designed for system administrators to audit their **own** networks and systems.
+* **Do not use this tool on networks you do not own.**
+* The author (@Futhark1393) is not responsible for any misuse.
 
 ## 📄 License
 
